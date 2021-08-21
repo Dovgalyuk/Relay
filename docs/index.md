@@ -1,37 +1,65 @@
-## Welcome to GitHub Pages
+# A fistful of relays
 
-You can use the [editor on GitHub](https://github.com/Dovgalyuk/Relay/edit/master/docs/index.md) to maintain and preview the content for your website in Markdown files.
+[[Build log]]
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+[[Architecture]]
 
-### Markdown
+[[Schematic]]
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+[[Construction]]
 
-```markdown
-Syntax highlighted code block
+[[Sample programs]]
 
-# Header 1
-## Header 2
-### Header 3
+[[Comparison of modern relay computers]]
 
-- Bulleted
-- List
+## Links
 
-1. Numbered
-2. List
+List of the relay computers on hackaday: https://hackaday.io/project/11798-relay-based-projects
 
-**Bold** and _Italic_ and `Code` text
+### Computers ###
 
-[Link](url) and ![Image](src)
-```
+Harry Porter's Relay Computer: http://web.cecs.pdx.edu/~harry/Relay/
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+Relay Computer Two: http://www.electronixandmore.com/projects/relaycomputertwo/index.html
 
-### Jekyll Themes
+RC-3 Relay Computer: http://www.computerculture.org/projects/rc3/
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Dovgalyuk/Relay/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+Edmund Berkeley's Simon Relay Processor: http://www.cs.ubc.ca/~hilpert/e/simon/index.html
 
-### Support or Contact
+TIM: http://www.northdownfarm.co.uk/rory/tim/tim-8.htm
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+DUO 14 Premium: http://www.ostracodfiles.com/ostracod/relay.html
+
+Relay computer "trainer": http://relaysbc.sourceforge.net/
+
+i² 8-Bit Relay Computer: http://isquared.weebly.com/
+
+Kilian Leonhardt's relay computer: http://www.relaiscomputer.de/
+
+Der Relaisrechner: http://www.schlaefendorf.de/relaisrechner/dokumentation/index.html
+
+Zusie: http://www.nablaman.com/relay
+
+### Work in progress ###
+
+MERCIA: http://www.relaiscomputer.nl/
+
+Paul Laws's Relay computer: http://relaycomputer.blogspot.ru
+
+https://hackaday.io/project/10303-relay-computer
+
+RISC Relay CPU: https://hackaday.io/project/11012-risc-relay-cpu
+
+Clicks - 16 bit Relay Computer: http://clicksrelaycpu.blogspot.ru/
+
+http://www.neodem.com/traceblog/index.php/category/relay-computer/
+
+https://github.com/radiolok/RelayComputer2
+
+https://www.youtube.com/channel/UC5-_rpS40owFzVVuxDF70Tw
+
+### Other relay devices ###
+
+Relay Calculating Engine: http://simonwinder.com/projects/relay-calculating-engine/
+
+4-bit adder: http://www.electronixandmore.com/projects/relaycomputer/index.html
