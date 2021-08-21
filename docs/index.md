@@ -6,7 +6,7 @@
 
 [Schematic]
 
-[Construction]
+[Construction](construction.md)
 
 [Sample programs](programs.md)
 
