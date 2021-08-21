@@ -4,7 +4,7 @@
 
 [Architecture]
 
-[Schematic]
+[Schematic](schematic.md)
 
 [Construction](construction.md)
 

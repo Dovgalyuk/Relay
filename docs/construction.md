@@ -8,25 +8,16 @@ But this decision has an opposite side: there are no LEDs with integrated resist
 Relays required for ALU components:
 
 Component | Number of relays
-----------------------------
+----------|-----------------
 Adder | 16
-----------------------------
 Subtractor | 16
-----------------------------
 Logic | 16
-----------------------------
 Shifter | 0
-----------------------------
 Result register | 13
-----------------------------
 Decoder | 5
-----------------------------
 Enable circuits | 19
-----------------------------
 CY storage | 3
-----------------------------
 ALU enable | 4
-----------------------------
 Total | 92
 
 ALU board:
@@ -41,19 +32,13 @@ Photo of completed ALU:
 
 Relays required for registers:
 Component | Number of relays
-----------------------------
+----------|-----------------
 Data | 64
-----------------------------
 Load | 8
-----------------------------
 Data enable | 32
-----------------------------
 Address enable | 8
-----------------------------
 Total | 112
-----------------------------
 Without PC | 97
-----------------------------
 Program counter | 15
 
 
