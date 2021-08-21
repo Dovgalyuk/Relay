@@ -19,7 +19,7 @@
   b = c;
  }
 ```
-https://www.youtube.com/watch?v=P9jCTSYUaJ8
+[![](https://img.youtube.com/vi/P9jCTSYUaJ8/0.jpg)](https://www.youtube.com/watch?v=P9jCTSYUaJ8)
 
 ## Euclid's algorithm
 ```
@@ -55,7 +55,7 @@ https://www.youtube.com/watch?v=P9jCTSYUaJ8
  }
  a += b;
 ```
-https://www.youtube.com/watch?v=RIoIWR7b1Ps
+[![](https://img.youtube.com/vi/RIoIWR7b1Ps/0.jpg)](https://www.youtube.com/watch?v=RIoIWR7b1Ps)
 
 ## Calculation of Pi
 
@@ -168,7 +168,7 @@ For 355/113 fraction with simpler division algorithm:
   ADC A, A, 0  ; 12: 01000000 10001000
   JMP Main     ; 13: 10000111 00000011
 ```
-https://youtu.be/bOOCfx2EN10
+[![](https://img.youtube.com/vi/bOOCfx2EN10/0.jpg)](https://youtu.be/bOOCfx2EN10)
 
 ## Multiplication subroutines
 
@@ -241,7 +241,7 @@ TODO
   JMP NZ,Loop  ; 08: 11100111 00000011
   HALT         ; 09: 00010000 00000000
 ```
-https://www.youtube.com/watch?v=hHF_ab6-ruQ
+[![](https://img.youtube.com/vi/hHF_ab6-ruQ/0.jpg)](https://www.youtube.com/watch?v=hHF_ab6-ruQ)
 
 ## Division subroutines
 
