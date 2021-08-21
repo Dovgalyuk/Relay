@@ -8,7 +8,7 @@
 
 [Construction]
 
-[Sample programs]
+[Sample programs](programs.md)
 
 [Comparison of modern relay computers]
 
