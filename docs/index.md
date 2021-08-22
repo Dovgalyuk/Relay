@@ -10,7 +10,7 @@
 
 [Sample programs](programs.md)
 
-[Comparison of modern relay computers]
+[Comparison of modern relay computers](computers.md)
 
 ## Links
 
