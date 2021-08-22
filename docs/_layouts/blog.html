@@ -7,7 +7,7 @@ layout: default
         <h3><a href="{{ post.date | date: '%Y-%m-%d' }} {{ post.url | prepend: site.baseurl }}">{{ post.title }}</a></h3>
         <p>{{ post.excerpt }}</p>
 		<div class="menu">
-			<a href="{{ post.url | prepend: site.baseurl }}">Read post</a>
+			<a href="{{ post.url }}">Read post</a>
 		</div>
     {% endfor %}
 </div>
