@@ -22,11 +22,11 @@ Total | 92
 
 ALU board:
 
-![](../Schemes/ALU%20board.png)
+![](/Schemes/ALU%20board.png)
 
 Photo of completed ALU:
 
-![](../Photos/ALU%20complete.JPG)
+![](/Photos/ALU%20complete.JPG)
 
 ## Registers module
 
@@ -45,12 +45,12 @@ Program counter | 15
 
 ### Registers board
 
-![](../Schemes/Registers%20board.png)
+![](/Schemes/Registers%20board.png)
 
 ## Control board
 
-![](../Schemes/Control%20board.png)
+![](/Schemes/Control%20board.png)
 
 ## Memory board
 
-![](../Schemes/Memory%20board.png)
+![](/Schemes/Memory%20board.png)

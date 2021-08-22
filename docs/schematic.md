@@ -2,15 +2,15 @@ This page describes the schematic of the computer elements. Each of the relays u
 
 Schematic for representing the relays was taken from Harry Porter's page:
 
-![](../Schemes/relay.jpg)
+![](/Schemes/relay.jpg)
 
 [[ABCD registers]]
 
 [[Address registers]]
 
-[[ALU]]
+[ALU schematic](schematic_alu.md)
 
-[[Control]]
+[Control block schematic](schematic_control.md)
 
 [Memory schematic](schematic_memory.md)
 
