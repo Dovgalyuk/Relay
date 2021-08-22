@@ -1,7 +1,3 @@
----
-title: "A fistful of relays"
----
-
 # A fistful of relays
 
 [Build log]
