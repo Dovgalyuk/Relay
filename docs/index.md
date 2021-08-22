@@ -1,6 +1,6 @@
 # A fistful of relays
 
-[Build log]
+[Build log](blog.html)
 
 [Architecture](architecture.md)
 
