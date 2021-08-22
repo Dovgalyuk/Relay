@@ -2,7 +2,7 @@
 
 [Build log]
 
-[Architecture]
+[Architecture](architecture.md)
 
 [Schematic](schematic.md)
 
