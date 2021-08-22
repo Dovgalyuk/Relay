@@ -291,14 +291,14 @@ Instruction code:
 
 ALU supports the following binary operations that are encoded by 'a' field of the instruction code:
 
-* ADC - calculates sum of operands and carry
-* ADD - calculates sum of operands
-* SBC - subtracts second operand and carry from the first one
-* SUB - subtracts second operand from the first one
-* AND - calculates bitwise AND
-* OR - calculates bitwise OR
-* XOR - calculates bitwise XOR
-* Unary - performs unary operation instead of binary. See the next section for details
+1. ADC - calculates sum of operands and carry
+1. ADD - calculates sum of operands
+1. SBC - subtracts second operand and carry from the first one
+1. SUB - subtracts second operand from the first one
+1. AND - calculates bitwise AND
+1. OR - calculates bitwise OR
+1. XOR - calculates bitwise XOR
+1. Unary - performs unary operation instead of binary. See the next section for details
 
 Semantics of the operations:
 ```
