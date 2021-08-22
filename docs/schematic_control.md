@@ -6,21 +6,21 @@
 
 ![](/Schemes/Sequencer.png)
 
-![](/Schemes/Sequencer%20copy.png)
+![](/Schemes/Sequencer copy.png)
 
 ## Instruction storage and decoding
 
 ![](/Schemes/Instruction.png)
 
-![](/Schemes/Instr%20Fetch.png)
+![](/Schemes/Instr Fetch.png)
 
-![](/Schemes/Instr%20ALU.png)
+![](/Schemes/Instr ALU.png)
 
-![](/Schemes/Instr%20Call%20Jmp%20Movi.png)
+![](/Schemes/Instr Call Jmp Movi.png)
 
-![](/Schemes/Instr%20Load%20Store.png)
+![](/Schemes/Instr Load Store.png)
 
-![](/Schemes/Instr%20Mov%20Halt.png)
+![](/Schemes/Instr Mov Halt.png)
 
 ## PC incrementer
 

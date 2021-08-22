@@ -4,9 +4,9 @@ Schematic for representing the relays was taken from Harry Porter's page:
 
 ![](/Schemes/relay.jpg)
 
-[[ABCD registers]]
+[ABCD registers](schematic_regs.md)
 
-[[Address registers]]
+[Address registers](schematic_address_reg.md)
 
 [ALU schematic](schematic_alu.md)
 
