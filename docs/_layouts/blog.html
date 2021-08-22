@@ -4,7 +4,7 @@ layout: default
 
 <div>
     {% for post in site.posts %}
-        <h3><a href="{{ page.date | date: '%e %B %Y' }} {{ post.url | prepend: site.baseurl }}">{{ post.title }}</a></h3>
+        <h3><a href="{{ post.date | date: '%Y-%m-%d' }} {{ post.url | prepend: site.baseurl }}">{{ post.title }}</a></h3>
         <p>{{ post.excerpt }}</p>
 		<div class="menu">
 			<a href="{{ post.url | prepend: site.baseurl }}">Read post</a>
