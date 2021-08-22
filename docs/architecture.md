@@ -374,10 +374,10 @@ Instruction code:
 
 Unary operations are the following:
 
-* NOT - bitwise not
-* SHR - shift to right
-* ROR - rotate to right
-* RCR - rotate through CY to right
+0. NOT - bitwise not
+0. SHR - shift to right
+0. ROR - rotate to right
+0. RCR - rotate through CY to right
 
 There are no shift left operations, because they can be simulated with ADD/ADC instructions.
 
