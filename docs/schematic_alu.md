@@ -1,6 +1,6 @@
 Arithmetic logic unit (ALU) consists of the following blocks:
 
-!()[/Schemes/ALU%20blocks.png]
+![](/Schemes/ALU%20blocks.png)
 
 * Red labels are used for external connections (with computer's bus).
 * Yellow rectangles are used for storing data
@@ -17,7 +17,7 @@ Calculations performed with ALU contain the following steps:
 
 These actions are performed by the following signals:
 
-!()[/Schemes/ALU%20timing.png]
+![](/Schemes/ALU%20timing.png)
 
 ALU requires 5 clock ticks to calculate, latch, and feed the result to the bus:
 * Tick 1 - LD_RES resets result register, and SEL_ALU1/2 enables ALU inputs.
@@ -34,14 +34,14 @@ Adder has "dual rail" design which was invented by Konrad Zuse for his Z3 comput
 Adder block takes two arguments, CY, and ~CY as an input and produces 8 bits of sum
 and one bit of Carry.
 
-!()[/Schemes/Adder.png]
+![](/Schemes/Adder.png)
 
 ## Subtractor block
 
 Subtractor block takes two arguments, CY, and ~CY as an input and produces 8 bits of difference
 and one bit of Carry.
 
-!()[/Schemes/Subtractor.png]
+![](/Schemes/Subtractor.png)
 
 ## Logic block
 
@@ -50,7 +50,7 @@ Logic block consists of several parts:
 * ROR block
 * SHR/RCR block
 
-!()[/Schemes/Logic.png]
+![](/Schemes/Logic.png)
 
 ## CY storage
 
@@ -62,7 +62,7 @@ Another one (Load) is used when CY value from the output of ALU should be stored
 
 When Select is not enabled +V is passed to ~CY output to make correct adding/subtracting.
 
-!()[/Schemes/CY%20storage.png]
+![](/Schemes/CY%20storage.png)
 
 ## ALU result register
 
@@ -74,7 +74,7 @@ Result of calculation is loaded by LD_RES signal and selected to data bus by usi
 
 One switch of every storage relay is used for generating Z flag which is used for conditional jumps.
 
-!()[/Schemes/ALU%20result.png]
+![](/Schemes/ALU%20result.png)
 
 ## ALU operations decoder
 
@@ -83,7 +83,7 @@ different ALU modules (adder, subtractor, OR, XOR, AND, shifter).
 
 It also generates signal for selecting CY for ALU input. It is used by ADC, SBC, and RCR operations.
 
-!()[/Schemes/ALU%20decoder.png]
+![](/Schemes/ALU%20decoder.png)
 
 ## Enable circuits
 
@@ -91,10 +91,10 @@ Enable circuits are used to pass ALU blocks outputs to result register.
 
 Output bits include 8 bits of result and CY value for Adder, Subtractor, and Shifter blocks.
 
-!()[/Schemes/ALU%20enable.png]
+![](/Schemes/ALU%20enable.png)
 
 ## Shifter circuits
 
 Shifters do not have any relays. They contain just wires for thansferring input bits to the output of the block.
 
-!()[/Schemes/Shifter.png]
+![](/Schemes/Shifter.png)
