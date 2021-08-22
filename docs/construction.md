@@ -22,15 +22,16 @@ Total | 92
 
 ALU board:
 
-![](https://github.com/Dovgaluk/Relay/blob/master/Schemes/ALU%20board.png)
+![](../Schemes/ALU%20board.png)
 
 Photo of completed ALU:
 
-![](https://github.com/Dovgaluk/Relay/blob/master/Photos/ALU%20complete.JPG)
+![](../Photos/ALU%20complete.JPG)
 
 ## Registers module
 
 Relays required for registers:
+
 Component | Number of relays
 ----------|-----------------
 Data | 64
@@ -44,12 +45,12 @@ Program counter | 15
 
 ### Registers board
 
-![](https://github.com/Dovgaluk/Relay/blob/master/Schemes/Registers%20board.png)
+![](../Schemes/Registers%20board.png)
 
 ## Control board
 
-![](https://github.com/Dovgalyuk/Relay/blob/master/Schemes/Control%20board.png)
+![](../Schemes/Control%20board.png)
 
 ## Memory board
 
-![](https://github.com/Dovgalyuk/Relay/blob/master/Schemes/Memory%20board.png)
+![](../Schemes/Memory%20board.png)
