@@ -1,5 +1,4 @@
 ---
-layout: page
 title: "A fistful of relays"
 ---
 
