@@ -8,5 +8,5 @@ Soldered clock generator.
 
 [![](http://img.youtube.com/vi/gtkKMYmQvT4/0.jpg)](http://www.youtube.com/watch?v=gtkKMYmQvT4)
 
-![](/Schemes/clock.png)
+![](/Relay/Schemes/clock.png)
 

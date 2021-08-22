@@ -10,4 +10,4 @@ First components for the computer:
 * 1 power supply with 24V/6.5A output
 * 10 meters of 0.12mm2 cable
 
-![](/Photos/First components.JPG)
+![](/Relay/Photos/First components.JPG)

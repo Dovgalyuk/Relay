@@ -11,7 +11,7 @@ Simplest increment program seem to be working:
 
 But there is a problem with programs that have intersection in non-zero bits in the instructions:
 
-![](/Photos/Bug_Memory.jpg)
+![](/Relay/Photos/Bug_Memory.jpg)
 
 I forgot to add diodes and the voltage from one selected ROM address passes to other addresses
 causing all of them to be selected.

@@ -7,5 +7,5 @@ After finding 3 failed relays within the subtractor module I decided to make a t
 
 I checked about 30 relays using this board and all of them seem good. It seems strange because I found ~5 bad relays within set of ~50 already assembled.
 
-![](/Photos/TestingBoard.JPG)
+![](/Relay/Photos/TestingBoard.JPG)
 

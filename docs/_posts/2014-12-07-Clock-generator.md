@@ -6,11 +6,11 @@ title: "Clock generator"
 Started experimenting on clock generator.
 I designed a scheme which consists of 2 relays and RC circuits:
 
-![](/Schemes/clock.png)
+![](/Relay/Schemes/clock.png)
 
 Then I bought two 100 Ohm resistors and two 1500 uF capacitors.
 
-![](/Photos/Components RC.jpg)
+![](/Relay/Photos/Components RC.jpg)
 
 Soldered clock works with 2.66 seconds period:
 

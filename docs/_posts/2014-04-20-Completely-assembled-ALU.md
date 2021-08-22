@@ -10,5 +10,5 @@ After last post in the blog I made the following modifications of ALU:
 # Screwed two hinges for hanging cabinet on the wall.
 
 And here it is! Completely assembled ALU:
-![](/Photos/ALU complete.JPG)
+![](/Relay/Photos/ALU complete.JPG)
 
