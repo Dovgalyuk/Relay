@@ -1,8 +1,8 @@
-# Compiler for a fistful of relays computer #
+# Compiler for a fistful of relays computer
 
-## Language features ##
+## Language features
 
-### Types ###
+### Types
 
 int - signed byte value
 
@@ -14,9 +14,15 @@ ulong - unsigned two-byte value
 
 arrays (require RAM to be implemented)
 
-### Literals ###
+### Literals
 
-### Arithmetic ###
+Decimal - 123
+
+Hexadecimal - 0xff
+
+Binary - 0b0011
+
+### Arithmetic
 
 add (+)
 
@@ -26,7 +32,13 @@ and (&)
 
 or (|)
 
-#### Shift operator ####
+xor (^)
+
+### Working with carry
+
+
+
+#### Shift operator
 
 ROR, SHR, RCR
 
@@ -58,23 +70,23 @@ Bidirectional:
 
 a = >>b -> c = >>d
 
-### Assignments ###
+### Assignments
 
-### Branches ###
+### Branches
 
-### Goto ###
+### Goto
 
-### Loops ###
+### Loops
 
-### Functions ###
+### Functions
 
 Function may return two values (divmod).
 
 Function may return CY and a register together.
 
-## Code samples ##
+## Code samples
 
-### Fibonacci sequence ###
+### Fibonacci sequence
 
 ```
 byte a = 0;
@@ -89,7 +101,7 @@ while (1==1)
 }
 ```
 
-### Euclid's algorithm ###
+### Euclid's algorithm
 
 ```
 byte a = op1;
@@ -105,7 +117,7 @@ a += b;
 OUT(a);
 ```
 
-### Calculation of Pi ###
+### Calculation of Pi
 
 22/7 fraction
 
@@ -135,7 +147,7 @@ OUT(a);
  while (1=1);
 ```
 
-### Multiplication ###
+### Multiplication
 
 ```
 long mul8x8to16 (int op1, int op2)
@@ -169,7 +181,7 @@ long mul8x8to16 (int op1, int op2)
 }
 ```
 
-### Division ###
+### Division
 
 ```
 int div8x8 (int op1, int op2)
@@ -214,7 +226,7 @@ int div8x8 (int op1, int op2)
 }
 ```
 
-### Guess the number game ###
+### Guess the number game
 
 ```
 int a = 1;
@@ -238,7 +250,7 @@ do
 while (1 == 1);
 ```
 
-### Tic-tac-toe game ###
+### Tic-tac-toe game
 
 Board storage is an array.
 
