@@ -436,7 +436,7 @@ Idea by [DimaThenekov](https://github.com/DimaThenekov/)
 ;    x567
 ;    x9ab
 ;    xdef
-; 36 instructions
+; 35 instructions
 Start:
     HALT
     ; board registers
@@ -476,15 +476,15 @@ O_move_loop:
     JMP CY, O_move_row1
     JMP Z, O_move_row2
 O_move_row3:
-    AND F, C, M
-    JMP Z, O_move
-    JMP O_move_loop
+    MOV L, C
+    JMP O_move_test
 O_move_row1:
-    AND F, A, M
-    JMP Z, O_move
-    JMP O_move_loop
+    MOV L, A
+    JMP O_move_test
 O_move_row2:
-    AND F, B, M
+    MOV L, B
+O_move_test:
+    AND F, L, M
     JMP NZ, O_move_loop
 O_move:
     CALL set_reg
