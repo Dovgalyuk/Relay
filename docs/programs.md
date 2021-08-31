@@ -419,3 +419,128 @@ Every register stores 1 'match' and the computer will subtract non-zero register
  Exit:
   HALT         ; 0d: 00010000 00000000
 ```
+
+### Tic-tac-toe
+#### Board is stored in the registers
+
+Idea by [DimaThenekov](https://github.com/DimaThenekov/)
+
+```
+; data storage
+; o-o    A: 00|000||101|
+; xxo -> B: 00|110||001|
+; oxx    C: 00|011||100|
+; move encoding
+; S: 0000rrcc - row & col (0-2)
+; S: xxxx
+;    x567
+;    x9ab
+;    xdef
+; 36 instructions
+Start:
+    HALT
+    ; board registers
+    MOVI А, 0
+    MOVI B, 0
+    MOVI C, 0
+
+; X move
+Main_loop:
+    ; input cell number into S in the next instruction
+    HALT
+    MOVI S, 5
+    CALL num2reg
+    ADD M, M, M
+    ADD M, M, M
+    ADD M, M, M
+    CALL set_reg
+
+; O move
+    ; geting seed
+    XOR D, A, B
+    XOR D, D, C
+    ADD D, D, 4
+O_move_loop:
+    ADD D, D, 1
+    ; r=0 or c=0 are invalid values
+    AND F, D, 3
+    JMP Z, O_move_loop
+    SHR S, D
+    AND F, S, 6
+    JMP Z, O_move_loop
+
+    MOVI S, 0xf
+    AND S, S, D
+    CALL num2reg
+    SUB F, S, 2
+    JMP CY, O_move_row1
+    JMP Z, O_move_row2
+O_move_row3:
+    AND F, C, M
+    JMP Z, O_move
+    JMP O_move_loop
+O_move_row1:
+    AND F, A, M
+    JMP Z, O_move
+    JMP O_move_loop
+O_move_row2:
+    AND F, B, M
+    JMP NZ, O_move_loop
+O_move:
+    CALL set_reg
+    JMP Main_loop
+
+check_win_hrz:
+; S - bits to check (0x38 or 0x7)
+; 7 instructions
+    SUB F, A, S
+    JMP Z, Start
+    SUB F, B, S
+    JMP Z, Start
+    SUB F, C, S
+    JMP Z, Start
+    MOV PC, L
+
+set_reg:
+; M(1<<n)
+; S(num of reg, 1..3)
+; 17 instructions
+    SUB F, S, 2
+    JMP NC, set_reg_3
+    JMP Z, set_reg_2
+    OR A, A, M
+    JMP check_win
+set_reg_2:
+    OR B, B, M
+    JMP check_win
+set_reg_3:
+    OR C, C, M
+check_win:
+    ; vertical test
+    AND S, A, B
+    AND S, S, C
+    JMP NZ, Stop
+    MOV D, L
+    ; horizontal test
+    MOVI S, 0x38
+    CALL check_win_hrz
+    MOVI S, 0x7
+    CALL check_win_hrz
+    ; TODO: diagonal test
+    MOV PC, D
+
+num2reg:
+; input: S register(0..f)
+; output: M(1<<S mod 4)
+;         S(S div 4)
+; 8 instructions
+num2reg_loop1:
+    AND M, S, 3
+    SUB F, M, 2
+    MOVI M, 1
+    MOVI CY M, 4
+    MOVI Z M, 2
+    SHR S, S
+    SHR S, S
+    MOV PC, L
+```
