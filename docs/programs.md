@@ -431,12 +431,13 @@ Idea by [DimaThenekov](https://github.com/DimaThenekov/)
 ; xxo -> B: 00|110||001|
 ; oxx    C: 00|011||100|
 ; move encoding
-; S: 0000rrcc - row & col (0-2)
+; S: 0000rrcc - row & col (1-3)
+;    columns are numbered from right to left
 ; S: xxxx
-;    x567
-;    x9ab
-;    xdef
-; 35 instructions
+;    765x
+;    ba9x
+;    fedx
+; 34 instructions
 Start:
     HALT
     ; board registers
@@ -476,15 +477,14 @@ O_move_loop:
     JMP CY, O_move_row1
     JMP Z, O_move_row2
 O_move_row3:
-    MOV L, C
+    AND F, C, M
     JMP O_move_test
 O_move_row1:
-    MOV L, A
+    AND F, A, M
     JMP O_move_test
 O_move_row2:
-    MOV L, B
+    AND F, B, M
 O_move_test:
-    AND F, L, M
     JMP NZ, O_move_loop
 O_move:
     CALL set_reg
@@ -519,7 +519,7 @@ check_win:
     ; vertical test
     AND S, A, B
     AND S, S, C
-    JMP NZ, Stop
+    JMP NZ, Start
     MOV D, L
     ; horizontal test
     MOVI S, 0x38
@@ -533,13 +533,10 @@ num2reg:
 ; input: S register(0..f)
 ; output: M(1<<S mod 4)
 ;         S(S div 4)
-; 8 instructions
-num2reg_loop1:
+; 6 instructions
     AND M, S, 3
-    SUB F, M, 2
-    MOVI M, 1
-    MOVI CY M, 4
-    MOVI Z M, 2
+    SUB F, M, 3
+    MOVI Z M, 4
     SHR S, S
     SHR S, S
     MOV PC, L
