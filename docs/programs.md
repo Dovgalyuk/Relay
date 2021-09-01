@@ -490,31 +490,23 @@ O_move:
     CALL set_reg
     JMP Main_loop
 
-check_win_hrz:
-; S - bits to check (0x38 or 0x7)
-; 7 instructions
-    SUB F, A, S
-    JMP Z, Start
-    SUB F, B, S
-    JMP Z, Start
-    SUB F, C, S
-    JMP Z, Start
-    MOV PC, L
-
 set_reg:
 ; M(1<<n)
 ; S(num of reg, 1..3)
-; 17 instructions
+; 31 instructions
     SUB F, S, 2
     JMP NC, set_reg_3
     JMP Z, set_reg_2
     OR A, A, M
+    MOV D, A
     JMP check_win
 set_reg_2:
     OR B, B, M
+    MOV D, B
     JMP check_win
 set_reg_3:
     OR C, C, M
+    MOV D, C
 check_win:
     ; vertical test
     AND S, A, B
@@ -523,11 +515,24 @@ check_win:
     MOV D, L
     ; horizontal test
     MOVI S, 0x38
-    CALL check_win_hrz
-    MOVI S, 0x7
-    CALL check_win_hrz
-    ; TODO: diagonal test
-    MOV PC, D
+    SUB F, D, S
+    JMP Z, Start
+    SUB F, D, 7
+    JMP Z, Start
+    ; diagonal1 test
+    SHR S, A
+    AND S, S, B
+    SHR S, S
+    AND S, S, C
+    JMP NZ, Start
+    ; diagonal2 test
+    SHR S, C
+    AND S, S, B
+    SHR S, S
+    AND S, S, A
+    JMP NZ, Start
+
+    MOV PC, L
 
 num2reg:
 ; input: S register(0..f)
