@@ -3,4 +3,6 @@ Relay
 
 A fistful of relays - relay computer schematic and software
 
-Build log: https://github.com/Dovgalyuk/Relay/wiki/Build-log
+Project page: https://dovgalyuk.github.io/Relay/
+
+Build log: https://dovgalyuk.github.io/Relay/blog.html
