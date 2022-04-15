@@ -170,3 +170,28 @@ All interconnections are made with 25-wire cables and D-sub connector.
 * 4 - WR_MEM
 * 5-24 - NC
 * 25 - GND
+
+### Memory - RAM/Display
+
+* 1 - D1:0
+* 2 - D1:1
+* 3 - D1:2
+* 4 - D1:3
+* 5 - D1:4
+* 6 - D1:5
+* 7 - D1:6
+* 8 - D1:7
+* 9 - A:0
+* 10 - A:1
+* 11 - A:2
+* 12 - A:3
+* 13 - A:4
+* 14 - A:5
+* 15 - A:6
+* 16 - A:7
+* 17 - SEL_MEMA_HI (for addresses 80-ff only)
+* 18 - RD_MEM
+* 19 - SEL_MEMD
+* 20 - WR_MEM
+* 21-24 - NC
+* 25 - GND
