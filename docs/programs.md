@@ -66,6 +66,25 @@ Second version, with operands loaded from the switches
   HALT         ; 0C: 00010000 00000000
 ```
 
+Third version, does not validate inputs
+
+```
+  ; switches - operands, A - result
+  ORG 0
+  LOAD A, 0x80 ; 00: 00100000 10000000
+  LOAD B, 0x81 ; 01: 00100001 10000001
+ Loop:
+  SUB A, A, B  ; 02: 01011000 00001001
+  JMP Z, End   ; 03: 10010111 00001000
+  JMP NC, Loop ; 04: 11000111 00000010
+  ADD A, A, B  ; 05: 01001000 00001001
+  SUB B, B, A  ; 06: 01011001 00011000
+  JMP NZ, Loop ; 07: 11100111 00000010
+ End:
+  ADD A, A, B  ; 08: 01001000 00001001
+  HALT         ; 09: 00010000 00000000
+```
+
 ```
  int a = op1;
  int b = op2;
