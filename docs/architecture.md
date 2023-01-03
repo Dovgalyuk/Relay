@@ -18,9 +18,11 @@ CPU has 3 flags:
 
 ## Memory map
 
-* 0x00 - 0x7f: program data
+* 0x00 - 0x3f: program data
+* 0x40 - 0x7f: reserved for program data
 * 0x80 - 0x8f: two 8-bit input switches (first for even addresses and second for odd)
-* 0x90 - 0xff: unused (read as 0)
+* 0x90 - 0x9f: teletype
+* 0xa0 - 0xff: unused (read as 0)
 
 ## Instructions set
 

@@ -6,11 +6,7 @@
 
 int - signed byte value
 
-long - signed two-byte value
-
 uint - unsigned byte value
-
-ulong - unsigned two-byte value
 
 arrays (require RAM to be implemented)
 
@@ -34,47 +30,31 @@ or (|)
 
 xor (^)
 
-### Working with carry
+### Working with flags
 
+CARRY: if (C(a + b))
 
+~CARRY: if (NC(a + b))
+
+SIGN: if (S(a - b))
+
+~SIGN: if (NS(a - b))
+
+ZERO: if (Z(a - b))
+
+~ZERO: if (NZ(a - b))
 
 #### Shift operator
 
-ROR, SHR, RCR
+SHR: a = >> b;
 
-Rvalue arg:
+SHR + RCR: ab = >> cd;
 
-C style: a = b >> 1;
-
-Prefix: a = >> b;
-
-Postfix: a = b >>;
-
-Array: a = b[6:1]
-
-Tuple: (r, cy) = << a;
-
-
-Lvalue arg:
-
-Pipe: a >> b >> c;
-
-Carry as a result: a << d << (0 >> c);
-
-Pipe with carry: >>a >>b <<c;
-
-Pipe with carry2: b=>>a -> c+=d -> e=<<f;
-
-
-Bidirectional:
-
-a = >>b -> c = >>d
+ROR: unsupported
 
 ### Assignments
 
 ### Branches
-
-### Goto
 
 ### Loops
 
