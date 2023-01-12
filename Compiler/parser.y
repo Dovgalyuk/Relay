@@ -1,15 +1,15 @@
 %code requires
 {
-#include "node.h"
-#define YYSTYPE Node *
+#include "tree.h"
+#define YYSTYPE Tree *
 }
 
 %{
 #include <stdio.h>
 #include "lexer.h" /* where yylex is declared */
 void yyerror(const char *s);
-class Node;
-extern Node *root;
+class Tree;
+extern Tree *root;
 %}
 
 /* Types and tokens */
@@ -22,7 +22,7 @@ extern Node *root;
 %token T_C T_NC T_Z T_NZ T_S T_NS
 %token T_EQUAL T_NEQUAL T_LESS T_GREATER
 %token T_NOT T_LOG_AND T_LOG_OR
-%token T_IF T_WHILE T_DO T_ARRAY T_RETURN
+%token T_IF T_ELSE T_WHILE T_DO T_ARRAY T_RETURN
 %token T_L_PARENT T_R_PARENT
 %token T_L_SQUARE T_R_SQUARE
 %token T_L_CURLY T_R_CURLY
@@ -30,6 +30,7 @@ extern Node *root;
 
 %left T_PLUS T_MINUS T_AND T_OR T_XOR
 %left T_LOG_AND T_LOG_OR
+%left T_ELSE T_IF
 
 %%
 
@@ -40,7 +41,7 @@ program:
 ;
 
 functions:
-    /* empty */ { $$ = new Node(NodeType::LIST); }
+    /* empty */ { $$ = new Tree(TreeType::LIST); }
     | function functions { $$ = $2; $$->addFirstChild($1); }
 ;
 
@@ -51,43 +52,130 @@ function:
 ;
 
 function_args:
+    /* empty */
+    | T_VAR function_args
 ;
 
 code_block:
-    T_L_CURLY statements T_R_CURLY { $$ = new Node(NodeType::SCOPE); $$->merge($2); }
+    T_L_CURLY statements T_R_CURLY { $$ = new Tree(TreeType::SCOPE); $$->merge($2); }
 ;
 
 statements:
-    /* empty */ { $$ = new Node(NodeType::LIST); }
+    /* empty */ { $$ = new Tree(TreeType::LIST); }
     | statement statements { $$ = $2; $$->addFirstChild($1); }
 ;
 
+// statement:
+//     statement_not_if
+//     | stat_if
+// ;
+
 statement:
+    open_statement
+    | closed_statement
+;
+
+open_statement:
+    if_header statement { $$->addChild($2); }
+    | if_header closed_statement T_ELSE open_statement
+      { $$->addChild($2); $$->addChild($4); }
+;
+
+closed_statement:
+    non_if_statement
+    | if_header closed_statement T_ELSE closed_statement
+      { $$->addChild($2); $$->addChild($4); }
+;
+
+if_header:
+    T_IF T_L_PARENT cond T_R_PARENT
+    { $$ = new Tree(TreeType::IF, $3); }
+;
+
+non_if_statement:
     T_SEMICOLON
     | stat_assign
+    | stat_return
+    | stat_prefix
     | code_block
 ;
 
 stat_assign:
     vars T_ASSIGN rvalue T_SEMICOLON
     {
-        $$ = new Node(NodeType::ASSIGN);
+        $$ = new Tree(TreeType::ASSIGN);
         $$->addChild($1);
         $$->addChild($3);
     }
 ;
 
+stat_return:
+    T_RETURN rvalue T_SEMICOLON
+    { $$ = new Tree(TreeType::RETURN); $$->addChild($2); }
+;
+
+stat_prefix:
+    prefix_expr T_SEMICOLON
+;
+
+cond:
+    cond_and
+    | cond_and T_LOG_OR cond
+    { $$ = new Tree(TreeType::OR, $1, $3); }
+;
+
+cond_and:
+    cond_simple
+    | cond_simple T_LOG_AND cond_and
+    { $$ = new Tree(TreeType::AND, $1, $3); }
+;
+
+cond_simple:
+    flag_check T_L_PARENT expr T_R_PARENT
+    { $$ = $1; $$->addChild($3); }
+;
+
+flag_check:
+    T_C { $$ = new Tree(TreeType::CARRY); }
+    | T_NC { $$ = new Tree(TreeType::NCARRY); }
+    | T_Z { $$ = new Tree(TreeType::ZERO); }
+    | T_NZ { $$ = new Tree(TreeType::NZERO); }
+    | T_S { $$ = new Tree(TreeType::SIGN); }
+    | T_NS { $$ = new Tree(TreeType::NSIGN); }
+;
+
 vars:
     T_VAR
     {
-        $$ = new Node(NodeType::LIST);
+        $$ = new Tree(TreeType::LIST);
         $$->addChild($1);
     }
     | T_VAR vars { $$ = $2; $$->addChild($1); }
 ;
 
 rvalue:
+    expr
+;
+
+expr:
     vars_int
+    | T_L_PARENT expr T_R_PARENT { $$ = $2; }
+    | prefix_expr
+    | vars_int T_PLUS expr
+      {
+          $$ = new Tree(TreeType::ADD);
+          $$->addChild($1);
+          $$->addChild($3);
+      }
+;
+
+prefix_expr:
+    shift_op vars_int { $$->addChild($2); }
+;
+
+shift_op:
+    T_SHL { $$ = new Tree(TreeType::LSHIFT); }
+    | T_SHR { $$ = new Tree(TreeType::RSHIFT); }
 ;
 
 vars_int:
@@ -99,7 +187,7 @@ vars_int:
 ;
 
 vars_int_r:
-    /* empty */ { $$ = new Node(NodeType::LIST); }
+    /* empty */ { $$ = new Tree(TreeType::LIST); }
     | var_int vars_int_r
     {
         $$ = $2;

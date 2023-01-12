@@ -1,8 +1,8 @@
 #ifndef CODEGEN_H
 #define CODEGEN_H
 
-#include "node.h"
+#include "tree.h"
 
-void codegen(Node *node);
+void codegen(Tree *root);
 
 #endif

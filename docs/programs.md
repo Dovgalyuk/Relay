@@ -212,6 +212,69 @@ For 355/113 fraction with simpler division algorithm:
 ```
 [![](https://img.youtube.com/vi/bOOCfx2EN10/0.jpg)](https://youtu.be/bOOCfx2EN10)
 
+
+For 355/113 fraction and teletype output:
+```
+  ; var a
+  MOVI A, 1    ; 00: 10000000 00000001
+  MOVI B, 99   ; 01: 10000001 01100011
+  ; var b
+  MOVI M, 113  ; 02: 10000100 01110001
+ Main:
+ Div:
+  MOVI L, 0    ; 03: 10000110 00000000
+ Loop:
+  SUB D, B, M  ; 04: 01011011 00011100
+  SBC C, A, 0  ; 05: 01010010 10001000
+  JMP C, Exit  ; 06: 10110111 00001011
+  ADD L, L, 1  ; 07: 01001110 11101001
+  MOV B, D     ; 08: 00011001 00110000
+  MOV A, C     ; 09: 00011000 00100000
+  JMP Loop     ; 0a: 10000111 00000100
+ Exit:
+  ; Print the digit
+  STORE L, 0x90; 0b: 00110110 10010000
+  ; rem * 2 still less than 256
+  ADD D, B, B  ; 0c: 01001011 00011001
+  ; rem * 4
+  ADD B, D, D  ; 0d: 01001001 00111011
+  ADC A, A, A  ; 0e: 01000000 00001000
+  ; rem * 8
+  ADD B, B, B  ; 0f: 01001001 00011001
+  ADC A, A, A  ; 10: 01000000 00001000
+  ; rem * 10
+  ADD B, B, D  ; 11: 01001001 00011011
+  ADC A, A, 0  ; 12: 01000000 10001000
+  JMP Main     ; 13: 10000111 00000011
+```
+
+Pseudocode for 355/113 fraction calculation:
+```
+@main()
+{
+    ab = 355;
+    m = 113;
+    WHILE (1)
+    {
+        l = 0;
+        dc = ab;
+        WHILE (NC(ab -= m))
+        {
+            l += 1;
+            dc = ab;
+        }
+        OUT(l);
+        // TODO: need multiplication by constant
+        <<c; // *2
+        b = c;
+        a = 0;
+        <<ab; // *4;
+        <<ab; // *8
+        ab += c; // *10
+    }
+}
+```
+
 ## Multiplication subroutines
 
 TODO
@@ -268,6 +331,19 @@ TODO
  }
 ```
 ### 8x8 -> 8
+```
+@mul8x8(a, b)
+{
+    r = 0;
+    while (a != 0)
+    {
+        if (C(>>a))
+            r = r + b;
+        <<b;
+    }
+    return r;
+}
+```
 ```
  ; C, D - operands, A - result
   MOVI C, op1  ; 00: 10000010 iiiiiiii
@@ -466,6 +542,8 @@ Every register stores 1 'match' and the computer will subtract non-zero register
 #### Board is stored in the registers
 
 Idea by [DimaThenekov](https://github.com/DimaThenekov/)
+
+But not working yet (not enough code memory)
 
 ```
 ; data storage

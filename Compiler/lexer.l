@@ -1,6 +1,6 @@
 %{
 #include "parser.h"
-#include "node.h"
+#include "tree.h"
 %}
 
 /* Scanner for the input file parser */
@@ -15,11 +15,11 @@ VAR      [a-z]
 
 %%
 
-{DIGIT}+ { yylval = new Node(atoi(yytext)); return T_INT; }
+{DIGIT}+ { yylval = new Tree(atoi(yytext)); return T_INT; }
 "0x"{HEX}+ return T_INT; // TODO
 "0b"{BIN}+ return T_INT; // TODO
-{VAR}    { yylval = new Node(yytext[0]); return T_VAR; }
-"@"[a-z0-9]+  { yylval = new Node(strdup(yytext + 1)); return T_FUNC; }
+{VAR}    { yylval = new Tree(yytext[0]); return T_VAR; }
+"@"[a-z0-9]+  { yylval = new Tree(strdup(yytext + 1)); return T_FUNC; }
 
 "="      return T_ASSIGN;
 
@@ -51,6 +51,7 @@ VAR      [a-z]
 "||"     return T_LOG_OR;
 
 IF       return T_IF;
+ELSE     return T_ELSE;
 WHILE    return T_WHILE;
 DO       return T_DO;
 ARRAY    return T_ARRAY;

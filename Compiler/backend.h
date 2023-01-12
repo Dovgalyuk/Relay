@@ -1,8 +1,8 @@
 #ifndef BACKEND_H
 #define BACKEND_H
 
-#include "node.h"
+#include "tree.h"
 
-Node *makeInstructions(Node *root);
+Tree *makeInstructions(Tree *root);
 
 #endif

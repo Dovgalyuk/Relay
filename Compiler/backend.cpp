@@ -1,34 +1,154 @@
+#include <cassert>
 #include "backend.h"
 
-static void processAssign(Node *func, Node *op)
+static void processAssign(Tree *func, Tree *op)
 {
-    NodeIterator left(op);
+    TreeIterator left(op);
     left.down().down();
-    NodeIterator right(op);
+    TreeIterator right(op);
     right.down().right().down();
     while (*left && *right)
     {
-        Node *mov = new Node(NodeType::MOV);
-        mov->addChild(new Node(*left));
-        mov->addChild(new Node(*right));
+        Tree *mov = new Tree(TreeType::MOV);
+        mov->addChild(new Tree(*left));
+        mov->addChild(new Tree(*right));
         func->addChild(mov);
         left = left.right();
         right = right.right();
     }
 }
 
-static Node *processFunction(Node *func)
+static void processIf(Tree *func, Tree *op)
 {
-    Node *newFunc = new Node(func);
+    TreeIterator left(op);
+    left.down();
+    TreeIterator right(left);
+    right.right();
+    func->addChild(new Tree(TreeType::JMP, (*left)->clone(), (*right)->clone()));
+}
 
-    NodeIterator it(func);
-    it.down().down();
+static void processAdd(Tree *func, Tree *op)
+{
+    TreeIterator res(op);
+    res.down();
+    TreeIterator left(res);
+    left.right();
+    TreeIterator right(left);
+    right.right();
+    res.down();
+    left.down();
+    right.down();
+    bool first = true;
+    while (*res)
+    {
+        Tree *n1 = *left;
+        Tree *n2 = *right;
+        if (n2)
+        {
+            if (n1 || n1->getType() == TreeType::INT)
+            {
+                std::swap(n1, n2);
+            }
+            assert(n1->getType() != TreeType::INT);
+        }
+        Tree *add = new Tree(first ? TreeType::ADD : TreeType::ADC);
+        add->addChild(new Tree(*res));
+        add->addChild(new Tree(n1));
+        if (n2)
+        {
+            add->addChild(new Tree(n2));
+            right.right();
+        }
+        else
+        {
+            add->addChild(new Tree(0));
+        }
+        func->addChild(add);
+        first = false;
+
+        res.right();
+        left.right();
+    }
+}
+
+static void processLShift(Tree *func, Tree *op)
+{
+    TreeIterator left(op);
+    left.down().down();
+    bool first = true;
+    while (*left)
+    {
+        if ((*left)->getType() == TreeType::INT)
+        {
+            // TODO: support non-zero
+        }
+        else
+        {
+            Tree *add = new Tree(first ? TreeType::ADD : TreeType::ADC);
+            add->addChild(new Tree(*left));
+            add->addChild(new Tree(*left));
+            add->addChild(new Tree(*left));
+            func->addChild(add);
+            first = false;
+        }
+        left.right();
+    }
+}
+
+static void processRShift(Tree *func, Tree *op)
+{
+    TreeIterator left(op);
+    left.down().down();
+    while (*left)
+        left.right();
+    left.left();
+    while (*left)
+    {
+        if ((*left)->getType() == TreeType::INT)
+        {
+            // TODO: support non-zero
+        }
+        else
+        {
+            Tree *shr = new Tree(TreeType::SHR);
+            shr->addChild(new Tree(*left));
+            shr->addChild(new Tree(*left));
+            func->addChild(shr);
+        }
+        left.left();
+    }
+}
+
+static Tree *processFunction(Tree *func)
+{
+    Tree *newFunc = new Tree(func);
+
+    TreeIterator it(func);
+    it.down();
     while (*it)
     {
         switch ((*it)->getType())
         {
-        case NodeType::ASSIGN:
+        case TreeType::LABEL:
+            newFunc->addChild(*it);
+            break;
+        case TreeType::ASSIGN:
             processAssign(newFunc, *it);
+            break;
+        case TreeType::IF:
+            processIf(newFunc, *it);
+            break;
+        case TreeType::RETURN:
+            // do nothing
+            break;
+        case TreeType::ADD:
+            processAdd(newFunc, *it);
+            break;
+        case TreeType::LSHIFT:
+            processLShift(newFunc, *it);
+            break;
+        case TreeType::RSHIFT:
+            processRShift(newFunc, *it);
             break;
         default:
             break;
@@ -39,11 +159,11 @@ static Node *processFunction(Node *func)
     return newFunc;
 }
 
-Node *makeInstructions(Node *root)
+Tree *makeInstructions(Tree *root)
 {
-    Node *newRoot = new Node(NodeType::LIST);
+    Tree *newRoot = new Tree(TreeType::LIST);
     // iterate over functions
-    NodeIterator it(root);
+    TreeIterator it(root);
     it.down();
     while (*it)
     {

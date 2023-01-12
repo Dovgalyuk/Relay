@@ -46,9 +46,11 @@ ZERO: if (Z(a - b))
 
 #### Shift operator
 
-SHR: a = >> b;
+Prefix modifying operation.
 
-SHR + RCR: ab = >> cd;
+SHR: >> b;
+
+SHR + RCR: >> cd;
 
 ROR: unsupported
 
@@ -62,7 +64,7 @@ ROR: unsupported
 
 Function may return two values (divmod).
 
-Function may return CY and a register together.
+?? Function may return CY and a register together.
 
 ## Code samples
 

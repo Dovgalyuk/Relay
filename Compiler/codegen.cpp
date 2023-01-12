@@ -2,27 +2,84 @@
 #include <cassert>
 #include "codegen.h"
 
-static void genAssign(Node *op)
+static void genLabel(Tree *op)
 {
-    auto it = op->getChildren().begin();
-    Node *left = *it++;
-    Node *right = *it;
-    std::cout << "MOV "
-        << left->getNodeName()
-        << " " << right->getNodeName() << "\n";
+    std::cout << "Label" << op->get<int>() << ":\n";
 }
 
-static void genFunc(Node *f)
+static void genAssign(Tree *op)
+{
+    auto it = op->getChildren().begin();
+    Tree *left = *it++;
+    Tree *right = *it;
+    std::cout << "MOV "
+        << left->getTreeName()
+        << " " << right->getTreeName() << "\n";
+}
+
+static void genJmp(Tree *op)
+{
+    TreeIterator it(op);
+    it.down();
+    Tree *first = *it;
+    it.right();
+    Tree *second = *it;
+    std::cout << "JMP "
+        << first->getTreeName()
+        << " " << second->getTreeName() << "\n";
+}
+
+static void genBinary(Tree *op)
+{
+    TreeIterator it(op);
+    it.down();
+    Tree *first = *it;
+    it.right();
+    Tree *second = *it;
+    it.right();
+    Tree *third = *it;
+    std::cout << op->getTreeName()
+        << " " << first->getTreeName()
+        << " " << second->getTreeName()
+        << " " << third->getTreeName() << "\n";
+}
+
+static void genUnary(Tree *op)
+{
+    TreeIterator it(op);
+    it.down();
+    Tree *first = *it;
+    it.right();
+    Tree *second = *it;
+    std::cout << op->getTreeName()
+        << " " << first->getTreeName()
+        << " " << second->getTreeName() << "\n";
+}
+
+static void genFunc(Tree *f)
 {
     std::cout << f->get<std::string>() << ":\n";
-    NodeIterator op(f);
+    TreeIterator op(f);
     op.down();
     while (*op)
     {
         switch ((*op)->getType())
         {
-        case NodeType::MOV:
+        case TreeType::LABEL:
+            genLabel(*op);
+            break;
+        case TreeType::MOV:
             genAssign(*op);
+            break;
+        case TreeType::JMP:
+            genJmp(*op);
+            break;
+        case TreeType::ADC:
+        case TreeType::ADD:
+            genBinary(*op);
+            break;
+        case TreeType::SHR:
+            genUnary(*op);
             break;
         default:
             assert(false);
@@ -31,14 +88,14 @@ static void genFunc(Node *f)
     }
 }
 
-void codegen(Node *node)
+void codegen(Tree *root)
 {
     std::cout << "Generated code:\n";
-    NodeIterator f(node);
+    TreeIterator f(root);
     f.down();
     while (*f)
     {
-        assert((*f)->getType() == NodeType::FUNC);
+        assert((*f)->getType() == TreeType::FUNC);
         genFunc(*f);
         f.right();
     }
