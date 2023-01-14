@@ -3,6 +3,7 @@
 
 #include "tree.h"
 
+Tree *createTemp();
 Tree *createTempVar(Tree *list1, Tree *list2);
 Tree *createLabel();
 

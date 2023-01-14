@@ -71,6 +71,46 @@ void Tree::merge(Tree *n)
     delete n;
 }
 
+void Tree::insertParent(Tree *n)
+{
+    replaceWith(n);
+    n->addChild(this);
+}
+
+void Tree::insertRight(Tree *n)
+{
+    if (next)
+    {
+        next->prev = n;
+    }
+    n->next = next;
+    n->prev = this;
+    n->parent = parent;
+    next = n;
+}
+
+void Tree::replaceWith(Tree *n)
+{
+    n->parent = parent;
+    if (parent->child == this)
+    {
+        parent->child = n;
+    }
+    parent = nullptr;
+    n->next = next;
+    n->prev = prev;
+    if (next)
+    {
+        next->prev = n;
+    }
+    if (prev)
+    {
+        prev->next = n;
+    }
+    next = nullptr;
+    prev = nullptr;
+}
+
 void Tree::print(int level) const
 {
     printTree(level);
@@ -109,6 +149,9 @@ std::string Tree::getTreeName() const
         return "Goto";
     case TreeType::CMP:
         return "Cmp";
+    case TreeType::PHI:
+        return "Phi";
+
     case TreeType::LSHIFT:
         return "LShift";
     case TreeType::RSHIFT:
@@ -133,6 +176,8 @@ std::string Tree::getTreeName() const
     case TreeType::NEQUAL:
         return "NEQUAL";
 
+    case TreeType::REG:
+        return std::string(1, (char)get<int>());
     case TreeType::MOV:
         return "MOV";
     case TreeType::JMP:

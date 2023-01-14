@@ -66,6 +66,18 @@ public:
         }
     }
 
+    template <typename S, typename F>
+    void dfs(Node *n, S state, const F &func)
+    {
+        func(n, state);
+        if (!n->visited)
+        {
+            n->visited = true;
+            for (auto next : n->links)
+                dfs(next, state, func);
+        }
+    }
+
     const Nodes &getNodes() const { return nodes; }
 
 private:

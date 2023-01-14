@@ -27,8 +27,11 @@ int main(int argc, char *argv[])
             std::cout << "\nGraph " << g << "\n";
             g->print();
         }
-
+        createVariables(codeGraph, root);
+        std::cout << "=== Created variables:\n";
+        root->print();
         // optimize assignments
+        codeGraph = createCodeGraph(root);
         makeCopyPropagation(codeGraph);
         // remove dead code
         // allocate variables

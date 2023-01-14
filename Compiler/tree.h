@@ -22,6 +22,7 @@ enum class TreeType
     WHILE,
     GOTO,
     CMP,
+    PHI,
     LSHIFT,
     RSHIFT,
     ALWAYS,
@@ -39,6 +40,8 @@ enum class TreeType
     ////////////////
     // backend nodes
     ////////////////
+    REG,
+    // operations
     MOV,
     JMP,
     // binary ops
@@ -112,6 +115,9 @@ public:
     void addFirstChild(Tree *n);
     void addChild(Tree *n);
     void merge(Tree *n);
+    void insertParent(Tree *n);
+    void insertRight(Tree *n);
+    void replaceWith(Tree *n);
 
     Tree *up() { return parent; }
     Tree *down() { return child; }

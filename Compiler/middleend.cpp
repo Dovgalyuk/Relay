@@ -1,3 +1,4 @@
+#include <map>
 #include "middleend.h"
 #include "objects.h"
 
@@ -168,14 +169,20 @@ static void processReturn(Tree *func, Tree *op)
 
 static Tree *processLShift(Tree *func, Tree *op)
 {
-    func->addChild(op->clone());
-    return op->down();
+    Tree *res = new Tree(TreeType::LSHIFT);
+    res->addChild(op->down()->clone());
+    res->addChild(op->down()->clone());
+    func->addChild(res);
+    return res->down();
 }
 
 static Tree *processRShift(Tree *func, Tree *op)
 {
-    func->addChild(op->clone());
-    return op->down();
+    Tree *res = new Tree(TreeType::RSHIFT);
+    res->addChild(op->down()->clone());
+    res->addChild(op->down()->clone());
+    func->addChild(res);
+    return res->down();
 }
 
 static void processStatement(Tree *func, Tree *st)
@@ -237,4 +244,117 @@ Tree *makeOperations(Tree *root)
     }
     delete root;
     return newRoot;
+}
+
+static void createVariablesFunc(CodeGraph *graph, Tree *func)
+{
+    typedef std::map<int, Trees> AllVars;
+    std::map<CodeGraph::Node*, AllVars> nodeVars;
+    typedef std::map<int, Tree*> Vars;
+    // collect variables
+    CodeGraph::Node *n = graph->getNodes().front();
+    graph->clearVisited();
+    graph->dfs(n, Vars(), [&nodeVars](CodeGraph::Node *node, Vars &vars)
+        {
+            Tree *tree = node->info;
+            TreeType tt = tree->getType();
+            Tree *left = tree->down();
+            if (tt == TreeType::LABEL)
+            {
+                // save the vars
+                for (auto &vv : vars)
+                {
+                    Trees &dest = nodeVars[node][vv.first];
+                    if (dest.empty())
+                    {
+                        dest.push_back(createTemp());
+                        // add symbol for reference
+                        dest.front()->addChild(new Tree(vv.second->down()));
+                    }
+                    dest.push_back(vv.second);
+                    vv.second = dest.front();
+                }
+            }
+            else if (tt != TreeType::CMP && tt != TreeType::RETURN
+                && left && left->getType() == TreeType::LIST)
+            {
+                // modifies first argument
+                for (Tree *sym = left->down() ; sym ; sym = sym->right())
+                {
+                    if (sym->getType() == TreeType::SYMBOL)
+                    {
+                        int var = sym->get<int>();
+                        Tree *temp = createTemp();
+                        vars[var] = temp;
+                        sym->insertParent(temp);
+                        sym = temp;
+                    }
+                }
+            }
+        }
+    );
+    // insert phi
+    for (auto nv : nodeVars)
+    {
+        for (auto vt : nv.second)
+        {
+            Tree *phiNode = new Tree(TreeType::PHI);
+            for (auto t : vt.second)
+                phiNode->addChild(t->clone());
+            nv.first->info->insertRight(phiNode);
+        }
+    }
+    // replace usages
+    Vars phi;
+    for (Tree *st = func->down() ; st ; st = st->right())
+    {
+        Tree *op = st->down();
+        if (op && st->getType() != TreeType::CMP
+            && st->getType() != TreeType::RETURN)
+        {
+            op = op->right();
+        }
+        for ( ; op ; op = op->right())
+        {
+            Tree *v = op;
+            if (v->getType() == TreeType::LIST)
+            {
+                v = v->down();
+            }
+            for ( ; v ; v = v->right())
+            {
+                if (v->getType() == TreeType::SYMBOL)
+                {
+                    Tree *n = phi[v->get<int>()];
+                    if (!n)
+                    {
+                        n = createTemp();
+                    }
+                    else
+                    {
+                        n = n->clone();
+                    }
+                    v->replaceWith(n);
+                    std::swap(v, n);
+                    delete n;
+                }
+            }
+        }
+        if (st->getType() == TreeType::PHI)
+        {
+            Tree *var = st->down();
+            Tree *sym = var->down();
+            phi[sym->get<int>()] = var;
+        }
+    }
+}
+
+void createVariables(CodeGraphList *graphs, Tree *root)
+{
+    root = root->down();
+    for (auto g : *graphs)
+    {
+        createVariablesFunc(g, root);
+        root = root->right();
+    }
 }

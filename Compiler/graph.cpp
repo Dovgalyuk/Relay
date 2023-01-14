@@ -19,9 +19,13 @@ CodeGraph *createFunctionGraph(Tree *func)
             labels[it->get<int>()] = node;
         }
         nodes[it] = node;
-        if (prev)
+        if (prev && prev->info)
         {
-            prev->addNext(node);
+            TreeType pt = prev->info->getType();
+            if (pt != TreeType::GOTO && pt != TreeType::RETURN)
+            {
+                prev->addNext(node);
+            }
         }
         prev = node;
         it = it->right();
@@ -31,9 +35,12 @@ CodeGraph *createFunctionGraph(Tree *func)
     while (it)
     {
         if (it->getType() == TreeType::JMP
-            || it->getType() == TreeType::IF)
+            || it->getType() == TreeType::IF
+            || it->getType() == TreeType::GOTO)
         {
-            Tree *lab = it->down()->right();
+            Tree *lab = it->down();
+            if (lab->right())
+                lab = lab->right();
             int label = lab->get<int>();
             CodeGraph::Node *labelNode = labels[label];
             assert(labelNode);
