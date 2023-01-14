@@ -66,6 +66,8 @@ public:
         }
     }
 
+    const Nodes &getNodes() const { return nodes; }
+
 private:
     Nodes nodes;
 };

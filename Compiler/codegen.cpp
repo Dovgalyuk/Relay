@@ -76,6 +76,8 @@ static void genFunc(Tree *f)
             break;
         case TreeType::ADC:
         case TreeType::ADD:
+        case TreeType::SBC:
+        case TreeType::SUB:
             genBinary(*op);
             break;
         case TreeType::SHR:

@@ -18,6 +18,9 @@ enum class TreeType
     ASSIGN,
     RETURN,
     IF,
+    WHILE,
+    GOTO,
+    CMP,
     LSHIFT,
     RSHIFT,
     ALWAYS,
@@ -27,6 +30,8 @@ enum class TreeType
     NZERO,
     SIGN,
     NSIGN,
+    EQUAL,
+    NEQUAL,
     // same as binary instructions
     // ADD, SUB, OR, XOR, AND
 

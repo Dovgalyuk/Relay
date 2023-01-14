@@ -73,11 +73,19 @@ std::string Tree::getTreeName() const
         return "Return";
     case TreeType::IF:
         return "If";
+    case TreeType::WHILE:
+        return "While";
+    case TreeType::GOTO:
+        return "Goto";
+    case TreeType::CMP:
+        return "Cmp";
     case TreeType::LSHIFT:
         return "LShift";
     case TreeType::RSHIFT:
         return "RShift";
 
+    case TreeType::ALWAYS:
+        return "ALWAYS";
     case TreeType::CARRY:
         return "CARRY";
     case TreeType::NCARRY:
@@ -90,6 +98,10 @@ std::string Tree::getTreeName() const
         return "SIGN";
     case TreeType::NSIGN:
         return "NSIGN";
+    case TreeType::EQUAL:
+        return "EQUAL";
+    case TreeType::NEQUAL:
+        return "NEQUAL";
 
     case TreeType::MOV:
         return "MOV";

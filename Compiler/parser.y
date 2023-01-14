@@ -65,11 +65,6 @@ statements:
     | statement statements { $$ = $2; $$->addFirstChild($1); }
 ;
 
-// statement:
-//     statement_not_if
-//     | stat_if
-// ;
-
 statement:
     open_statement
     | closed_statement
@@ -79,17 +74,26 @@ open_statement:
     if_header statement { $$->addChild($2); }
     | if_header closed_statement T_ELSE open_statement
       { $$->addChild($2); $$->addChild($4); }
+    | while_header open_statement
+      { $$->addChild($2); }
 ;
 
 closed_statement:
     non_if_statement
     | if_header closed_statement T_ELSE closed_statement
       { $$->addChild($2); $$->addChild($4); }
+    | while_header closed_statement
+      { $$->addChild($2); }
 ;
 
 if_header:
     T_IF T_L_PARENT cond T_R_PARENT
     { $$ = new Tree(TreeType::IF, $3); }
+;
+
+while_header:
+    T_WHILE T_L_PARENT cond T_R_PARENT
+    { $$ = new Tree(TreeType::WHILE, $3); }
 ;
 
 non_if_statement:
@@ -132,7 +136,9 @@ cond_and:
 
 cond_simple:
     flag_check T_L_PARENT expr T_R_PARENT
-    { $$ = $1; $$->addChild($3); }
+      { $$ = $1; $$->addChild($3); }
+    | vars T_NEQUAL vars_int
+      { $$ = new Tree(TreeType::NEQUAL, $1, $3); }
 ;
 
 flag_check:

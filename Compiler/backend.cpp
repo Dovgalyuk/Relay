@@ -27,6 +27,15 @@ static void processIf(Tree *func, Tree *op)
     func->addChild(new Tree(TreeType::JMP, (*left)->clone(), (*right)->clone()));
 }
 
+static void processGoto(Tree *func, Tree *op)
+{
+    TreeIterator left(op);
+    left.down();
+    func->addChild(new Tree(TreeType::JMP,
+        new Tree(TreeType::ALWAYS),
+        (*left)->clone()));
+}
+
 static void processAdd(Tree *func, Tree *op)
 {
     TreeIterator res(op);
@@ -67,6 +76,39 @@ static void processAdd(Tree *func, Tree *op)
         first = false;
 
         res.right();
+        left.right();
+    }
+}
+
+static void processCmp(Tree *func, Tree *op)
+{
+    TreeIterator left(op);
+    left.down();
+    TreeIterator right(left);
+    right.right();
+    left.down();
+    right.down();
+    bool first = true;
+    while (*left || *right)
+    {
+        Tree *n1 = *left;
+        Tree *n2 = *right;
+        Tree *sub = new Tree(first ? TreeType::SUB : TreeType::SBC);
+        // This is FLAG register
+        sub->addChild(new Tree(-1, TreeType::VAR));
+        sub->addChild(new Tree(n1));
+        if (n2)
+        {
+            sub->addChild(new Tree(n2));
+            right.right();
+        }
+        else
+        {
+            sub->addChild(new Tree(0));
+        }
+        func->addChild(sub);
+        first = false;
+
         left.right();
     }
 }
@@ -138,8 +180,18 @@ static Tree *processFunction(Tree *func)
         case TreeType::IF:
             processIf(newFunc, *it);
             break;
+        case TreeType::GOTO:
+            processGoto(newFunc, *it);
+            break;
+        case TreeType::CMP:
+            processCmp(newFunc, *it);
+            break;
         case TreeType::RETURN:
-            // do nothing
+            newFunc->addChild(
+                new Tree(TreeType::JMP,
+                    new Tree(TreeType::ALWAYS),
+                    // This is L register
+                    new Tree(-1, TreeType::VAR)));
             break;
         case TreeType::ADD:
             processAdd(newFunc, *it);

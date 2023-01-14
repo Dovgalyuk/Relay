@@ -35,6 +35,8 @@ static Tree *processExpr(Tree *func, Tree *expr)
         return processLShift(func, expr)->clone();
     case TreeType::RSHIFT:
         return processRShift(func, expr)->clone();
+    default:
+        assert(0);
     }
     return nullptr;
 }
@@ -50,7 +52,7 @@ static void processAssign(Tree *func, Tree *op)
     func->addChild(res);
 }
 
-static void process_simple_cond(Tree *func, Tree *cond, Tree *label_then, Tree *label_else)
+static void processSimpleCond(Tree *func, Tree *cond, Tree *label_then, Tree *label_else)
 {
     TreeIterator cond_child(cond);
     cond_child.down();
@@ -77,12 +79,40 @@ static void process_simple_cond(Tree *func, Tree *cond, Tree *label_then, Tree *
     case TreeType::NSIGN:
         if_op->addChild(new Tree(TreeType::SIGN));
         break;
+    default:
+        assert(0);
     }
     if_op->addChild(label_else->clone());
     func->addChild(if_op);
 }
 
-static void process_cond(Tree *func, Tree *cond, Tree *label_then, Tree *label_else)
+static void processComparison(Tree *func, Tree *cond, Tree *label_then, Tree *label_else)
+{
+    TreeIterator it(cond);
+    it.down();
+    Tree *left = processExpr(func, *it);
+    it.right();
+    Tree *right = processExpr(func, *it);
+    Tree *op = new Tree(TreeType::CMP, left, right);
+    func->addChild(op);
+    // add if
+    Tree *if_op = new Tree(TreeType::IF);
+    switch (cond->getType())
+    {
+    case TreeType::EQUAL:
+        if_op->addChild(new Tree(TreeType::NZERO));
+        break;
+    case TreeType::NEQUAL:
+        if_op->addChild(new Tree(TreeType::ZERO));
+        break;
+    default:
+        assert(0);
+    }
+    if_op->addChild(label_else->clone());
+    func->addChild(if_op);
+}
+
+static void processCond(Tree *func, Tree *cond, Tree *label_then, Tree *label_else)
 {
     switch (cond->getType())
     {
@@ -90,8 +120,12 @@ static void process_cond(Tree *func, Tree *cond, Tree *label_then, Tree *label_e
     case TreeType::OR:
         // TODO
         break;
+    case TreeType::EQUAL:
+    case TreeType::NEQUAL:
+        processComparison(func, cond, label_then, label_else);
+        break;
     default:
-        process_simple_cond(func, cond, label_then, label_else);
+        processSimpleCond(func, cond, label_then, label_else);
     }
 }
 
@@ -107,7 +141,7 @@ static void processIf(Tree *func, Tree *op)
     child.right();
     Tree *else_op = *child;
     // add cond + if
-    process_cond(func, cond, label_then, label_else);
+    processCond(func, cond, label_then, label_else);
     // add then
     func->addChild(label_then);
     processStatement(func, then_op);
@@ -117,6 +151,33 @@ static void processIf(Tree *func, Tree *op)
     {
         processStatement(func, else_op);
     }
+}
+
+static void processWhile(Tree *func, Tree *op)
+{
+    Tree *label_cont = createLabel();
+    Tree *label_body = createLabel();
+    Tree *label_exit = createLabel();
+
+    TreeIterator child(op);
+    child.down();
+    Tree *cond = *child;
+    child.right();
+    Tree *body = *child;
+    /*
+    Label:
+      CMP
+      JMP Cond, Exit
+      Body
+      JMP Label
+    Exit:
+    */
+    func->addChild(label_cont);
+    processCond(func, cond, label_body, label_exit);
+    func->addChild(label_body);
+    processStatement(func, body);
+    func->addChild(new Tree(TreeType::GOTO, label_cont->clone()));
+    func->addChild(label_exit);
 }
 
 static void processReturn(Tree *func, Tree *op)
@@ -154,6 +215,9 @@ static void processStatement(Tree *func, Tree *st)
         break;
     case TreeType::IF:
         processIf(func, st);
+        break;
+    case TreeType::WHILE:
+        processWhile(func, st);
         break;
     case TreeType::RETURN:
         processReturn(func, st);
