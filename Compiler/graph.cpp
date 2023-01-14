@@ -7,42 +7,40 @@ CodeGraph *createFunctionGraph(Tree *func)
     std::map<int, CodeGraph::Node*> labels;
     std::map<Tree*, CodeGraph::Node*> nodes;
 
-    TreeIterator it(func);
-    it.down();
+    Tree *it = func->down();
     CodeGraph *graph = new CodeGraph;
     // create nodes and labels
     CodeGraph::Node *prev = nullptr;
-    while (*it)
+    while (it)
     {
-        CodeGraph::Node *node = graph->addNode(*it);
-        if ((*it)->getType() == TreeType::LABEL)
+        CodeGraph::Node *node = graph->addNode(it);
+        if (it->getType() == TreeType::LABEL)
         {
-            labels[(*it)->get<int>()] = node;
+            labels[it->get<int>()] = node;
         }
-        nodes[*it] = node;
+        nodes[it] = node;
         if (prev)
         {
             prev->addNext(node);
         }
         prev = node;
-        it.right();
+        it = it->right();
     }
     // create links
-    it.up().down();
-    while (*it)
+    it = func->down();
+    while (it)
     {
-        if ((*it)->getType() == TreeType::JMP
-            || (*it)->getType() == TreeType::IF)
+        if (it->getType() == TreeType::JMP
+            || it->getType() == TreeType::IF)
         {
-            it.down().right();
-            int label = (*it)->get<int>();
+            Tree *lab = it->down()->right();
+            int label = lab->get<int>();
             CodeGraph::Node *labelNode = labels[label];
             assert(labelNode);
-            it.up();
-            CodeGraph::Node *current = nodes[*it];
+            CodeGraph::Node *current = nodes[it];
             current->addNext(labelNode);
         }
-        it.right();
+        it = it->right();
     }
     return graph;
 }
@@ -50,12 +48,11 @@ CodeGraph *createFunctionGraph(Tree *func)
 CodeGraphList *createCodeGraph(Tree *root)
 {
     CodeGraphList *graph = new CodeGraphList;
-    TreeIterator it(root);
-    it.down();
-    while (*it)
+    Tree *it = root->down();
+    while (it)
     {
-        graph->push_back(createFunctionGraph(*it));
-        it.right();
+        graph->push_back(createFunctionGraph(it));
+        it = it->right();
     }
     return graph;
 }
@@ -65,4 +62,3 @@ void Graph<Tree*>::Node::printInfo()
 {
     info->print(4);
 }
-

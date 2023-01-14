@@ -18,11 +18,8 @@ static Tree *processExpr(Tree *func, Tree *expr)
     case TreeType::ADD:
     case TreeType::SUB:
         {
-            TreeIterator it(expr);
-            it.down();
-            Tree *left = processExpr(func, *it);
-            it.right();
-            Tree *right = processExpr(func, *it);
+            Tree *left = processExpr(func, expr->down());
+            Tree *right = processExpr(func, expr->down()->right());
             Tree *res = createTempVar(left, right);
             Tree *op = new Tree(expr->getType());
             op->addChild(res);
@@ -43,20 +40,15 @@ static Tree *processExpr(Tree *func, Tree *expr)
 
 static void processAssign(Tree *func, Tree *op)
 {
-    TreeIterator left(op);
-    left.down();
     Tree *res = new Tree(TreeType::ASSIGN);
-    res->addChild(*left);
-    left.right();
-    res->addChild(processExpr(func, *left));
+    res->addChild(op->down()->clone());
+    res->addChild(processExpr(func, op->down()->right()));
     func->addChild(res);
 }
 
 static void processSimpleCond(Tree *func, Tree *cond, Tree *label_then, Tree *label_else)
 {
-    TreeIterator cond_child(cond);
-    cond_child.down();
-    processExpr(func, *cond_child);
+    processExpr(func, cond->down());
     // add if
     Tree *if_op = new Tree(TreeType::IF);
     switch (cond->getType())
@@ -88,11 +80,8 @@ static void processSimpleCond(Tree *func, Tree *cond, Tree *label_then, Tree *la
 
 static void processComparison(Tree *func, Tree *cond, Tree *label_then, Tree *label_else)
 {
-    TreeIterator it(cond);
-    it.down();
-    Tree *left = processExpr(func, *it);
-    it.right();
-    Tree *right = processExpr(func, *it);
+    Tree *left = processExpr(func, cond->down());
+    Tree *right = processExpr(func, cond->down()->right());
     Tree *op = new Tree(TreeType::CMP, left, right);
     func->addChild(op);
     // add if
@@ -133,15 +122,10 @@ static void processIf(Tree *func, Tree *op)
 {
     Tree *label_then = createLabel();
     Tree *label_else = createLabel();
-    TreeIterator child(op);
-    child.down();
-    Tree *cond = *child;
-    child.right();
-    Tree *then_op = *child;
-    child.right();
-    Tree *else_op = *child;
+    Tree *then_op = op->down()->right();
+    Tree *else_op = then_op->right();
     // add cond + if
-    processCond(func, cond, label_then, label_else);
+    processCond(func, op->down(), label_then, label_else);
     // add then
     func->addChild(label_then);
     processStatement(func, then_op);
@@ -159,11 +143,6 @@ static void processWhile(Tree *func, Tree *op)
     Tree *label_body = createLabel();
     Tree *label_exit = createLabel();
 
-    TreeIterator child(op);
-    child.down();
-    Tree *cond = *child;
-    child.right();
-    Tree *body = *child;
     /*
     Label:
       CMP
@@ -173,34 +152,30 @@ static void processWhile(Tree *func, Tree *op)
     Exit:
     */
     func->addChild(label_cont);
-    processCond(func, cond, label_body, label_exit);
+    processCond(func, op->down(), label_body, label_exit);
     func->addChild(label_body);
-    processStatement(func, body);
+    processStatement(func, op->down()->right());
     func->addChild(new Tree(TreeType::GOTO, label_cont->clone()));
     func->addChild(label_exit);
 }
 
 static void processReturn(Tree *func, Tree *op)
 {
-    TreeIterator child(op);
-    child.down();
     Tree *res = new Tree(TreeType::RETURN);
-    res->addChild(processExpr(func, *child));
+    res->addChild(processExpr(func, op->down()));
     func->addChild(res);
 }
 
 static Tree *processLShift(Tree *func, Tree *op)
 {
     func->addChild(op->clone());
-    TreeIterator child(op);
-    return *child.down();
+    return op->down();
 }
 
 static Tree *processRShift(Tree *func, Tree *op)
 {
     func->addChild(op->clone());
-    TreeIterator child(op);
-    return *child.down();
+    return op->down();
 }
 
 static void processStatement(Tree *func, Tree *st)
@@ -235,24 +210,18 @@ static void processStatement(Tree *func, Tree *st)
 
 static void processScope(Tree *func, Tree *sc)
 {
-    TreeIterator it(sc);
-    it.down();
-
-    while (*it)
+    Tree *it = sc->down();
+    while (it)
     {
-        processStatement(func, *it);
-        it.right();
+        processStatement(func, it);
+        it = it->right();
     }
 }
 
 static Tree *processFunction(Tree *func)
 {
     Tree *newFunc = new Tree(func);
-
-    TreeIterator it(func);
-    it.down();
-    processScope(newFunc, *it);
-
+    processScope(newFunc, func->down());
     return newFunc;
 }
 
@@ -260,12 +229,11 @@ Tree *makeOperations(Tree *root)
 {
     Tree *newRoot = new Tree(TreeType::LIST);
     // iterate over functions
-    TreeIterator it(root);
-    it.down();
-    while (*it)
+    Tree *it = root->down();
+    while (it)
     {
-        newRoot->addChild(processFunction(*it));
-        it.right();
+        newRoot->addChild(processFunction(it));
+        it = it->right();
     }
     delete root;
     return newRoot;

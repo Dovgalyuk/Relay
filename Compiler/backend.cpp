@@ -3,55 +3,46 @@
 
 static void processAssign(Tree *func, Tree *op)
 {
-    TreeIterator left(op);
-    left.down().down();
-    TreeIterator right(op);
-    right.down().right().down();
-    while (*left && *right)
+    Tree *left = op->down()->down();
+    Tree *right = op->down()->right()->down();
+    while (left && right)
     {
         Tree *mov = new Tree(TreeType::MOV);
-        mov->addChild(new Tree(*left));
-        mov->addChild(new Tree(*right));
+        mov->addChild(new Tree(left));
+        mov->addChild(new Tree(right));
         func->addChild(mov);
-        left = left.right();
-        right = right.right();
+        left = left->right();
+        right = right->right();
     }
 }
 
 static void processIf(Tree *func, Tree *op)
 {
-    TreeIterator left(op);
-    left.down();
-    TreeIterator right(left);
-    right.right();
-    func->addChild(new Tree(TreeType::JMP, (*left)->clone(), (*right)->clone()));
+    func->addChild(new Tree(TreeType::JMP,
+        op->down()->clone(),
+        op->down()->right()->clone()));
 }
 
 static void processGoto(Tree *func, Tree *op)
 {
-    TreeIterator left(op);
-    left.down();
     func->addChild(new Tree(TreeType::JMP,
         new Tree(TreeType::ALWAYS),
-        (*left)->clone()));
+        op->down()->clone()));
 }
 
 static void processAdd(Tree *func, Tree *op)
 {
-    TreeIterator res(op);
-    res.down();
-    TreeIterator left(res);
-    left.right();
-    TreeIterator right(left);
-    right.right();
-    res.down();
-    left.down();
-    right.down();
+    Tree *res = op->down();
+    Tree *left = res->right();
+    Tree *right = left->right();
+    res = res->down();
+    left = left->down();
+    right = right->down();
     bool first = true;
-    while (*res)
+    while (res)
     {
-        Tree *n1 = *left;
-        Tree *n2 = *right;
+        Tree *n1 = left;
+        Tree *n2 = right;
         if (n2)
         {
             if (n1 || n1->getType() == TreeType::INT)
@@ -61,12 +52,12 @@ static void processAdd(Tree *func, Tree *op)
             assert(n1->getType() != TreeType::INT);
         }
         Tree *add = new Tree(first ? TreeType::ADD : TreeType::ADC);
-        add->addChild(new Tree(*res));
+        add->addChild(new Tree(res));
         add->addChild(new Tree(n1));
         if (n2)
         {
             add->addChild(new Tree(n2));
-            right.right();
+            right = right->right();
         }
         else
         {
@@ -75,24 +66,22 @@ static void processAdd(Tree *func, Tree *op)
         func->addChild(add);
         first = false;
 
-        res.right();
-        left.right();
+        res = res->right();
+        left = left->right();
     }
 }
 
 static void processCmp(Tree *func, Tree *op)
 {
-    TreeIterator left(op);
-    left.down();
-    TreeIterator right(left);
-    right.right();
-    left.down();
-    right.down();
+    Tree *left = op->down();
+    Tree* right = left->right();
+    left = left->down();
+    right = right->down();
     bool first = true;
-    while (*left || *right)
+    while (left || right)
     {
-        Tree *n1 = *left;
-        Tree *n2 = *right;
+        Tree *n1 = left;
+        Tree *n2 = right;
         Tree *sub = new Tree(first ? TreeType::SUB : TreeType::SBC);
         // This is FLAG register
         sub->addChild(new Tree(-1, TreeType::VAR));
@@ -100,7 +89,7 @@ static void processCmp(Tree *func, Tree *op)
         if (n2)
         {
             sub->addChild(new Tree(n2));
-            right.right();
+            right = right->right();
         }
         else
         {
@@ -109,55 +98,52 @@ static void processCmp(Tree *func, Tree *op)
         func->addChild(sub);
         first = false;
 
-        left.right();
+        left = left->right();
     }
 }
 
 static void processLShift(Tree *func, Tree *op)
 {
-    TreeIterator left(op);
-    left.down().down();
+    Tree *left = op->down()->down();
     bool first = true;
-    while (*left)
+    while (left)
     {
-        if ((*left)->getType() == TreeType::INT)
+        if (left->getType() == TreeType::INT)
         {
             // TODO: support non-zero
         }
         else
         {
             Tree *add = new Tree(first ? TreeType::ADD : TreeType::ADC);
-            add->addChild(new Tree(*left));
-            add->addChild(new Tree(*left));
-            add->addChild(new Tree(*left));
+            add->addChild(new Tree(left));
+            add->addChild(new Tree(left));
+            add->addChild(new Tree(left));
             func->addChild(add);
             first = false;
         }
-        left.right();
+        left = left->right();
     }
 }
 
 static void processRShift(Tree *func, Tree *op)
 {
-    TreeIterator left(op);
-    left.down().down();
-    while (*left)
-        left.right();
-    left.left();
-    while (*left)
+    Tree *left = op->down()->down();
+    while (left->right())
+        left = left->right();
+    while (left)
     {
-        if ((*left)->getType() == TreeType::INT)
+        if (left->getType() == TreeType::INT)
         {
             // TODO: support non-zero
         }
         else
         {
             Tree *shr = new Tree(TreeType::SHR);
-            shr->addChild(new Tree(*left));
-            shr->addChild(new Tree(*left));
+            shr->addChild(new Tree(left));
+            shr->addChild(new Tree(left));
             func->addChild(shr);
         }
-        left.left();
+        left = left->left();
     }
 }
 
@@ -165,26 +151,25 @@ static Tree *processFunction(Tree *func)
 {
     Tree *newFunc = new Tree(func);
 
-    TreeIterator it(func);
-    it.down();
-    while (*it)
+    Tree *it = func->down();
+    while (it)
     {
-        switch ((*it)->getType())
+        switch (it->getType())
         {
         case TreeType::LABEL:
-            newFunc->addChild(*it);
+            newFunc->addChild(it->clone());
             break;
         case TreeType::ASSIGN:
-            processAssign(newFunc, *it);
+            processAssign(newFunc, it);
             break;
         case TreeType::IF:
-            processIf(newFunc, *it);
+            processIf(newFunc, it);
             break;
         case TreeType::GOTO:
-            processGoto(newFunc, *it);
+            processGoto(newFunc, it);
             break;
         case TreeType::CMP:
-            processCmp(newFunc, *it);
+            processCmp(newFunc, it);
             break;
         case TreeType::RETURN:
             newFunc->addChild(
@@ -194,18 +179,18 @@ static Tree *processFunction(Tree *func)
                     new Tree(-1, TreeType::VAR)));
             break;
         case TreeType::ADD:
-            processAdd(newFunc, *it);
+            processAdd(newFunc, it);
             break;
         case TreeType::LSHIFT:
-            processLShift(newFunc, *it);
+            processLShift(newFunc, it);
             break;
         case TreeType::RSHIFT:
-            processRShift(newFunc, *it);
+            processRShift(newFunc, it);
             break;
         default:
             break;
         }
-        it.right();
+        it = it->right();
     }
 
     return newFunc;
@@ -215,12 +200,11 @@ Tree *makeInstructions(Tree *root)
 {
     Tree *newRoot = new Tree(TreeType::LIST);
     // iterate over functions
-    TreeIterator it(root);
-    it.down();
-    while (*it)
+    Tree *it = root->down();
+    while (it)
     {
-        newRoot->addChild(processFunction(*it));
-        it.right();
+        newRoot->addChild(processFunction(it));
+        it = it->right();
     }
     delete root;
     return newRoot;

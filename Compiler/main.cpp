@@ -15,13 +15,11 @@ int main(int argc, char *argv[])
         std::cout << "=== Syntax tree:\n";
         root->print();
         // optimize tree
-        // create scopes
         // convert to 3-address code
         root = makeOperations(root);
         std::cout << "=== 3-address tree:\n";
         root->print();
-        // convert to SSA
-        // optimize assignments
+        // create scopes and variables and convert to SSA
         CodeGraphList *codeGraph = createCodeGraph(root);
         std::cout << "=== control flow graphs:\n";
         for (auto g : *codeGraph)
@@ -29,6 +27,8 @@ int main(int argc, char *argv[])
             std::cout << "\nGraph " << g << "\n";
             g->print();
         }
+
+        // optimize assignments
         makeCopyPropagation(codeGraph);
         // remove dead code
         // allocate variables

@@ -9,96 +9,74 @@ static void genLabel(Tree *op)
 
 static void genAssign(Tree *op)
 {
-    auto it = op->getChildren().begin();
-    Tree *left = *it++;
-    Tree *right = *it;
     std::cout << "MOV "
-        << left->getTreeName()
-        << " " << right->getTreeName() << "\n";
+        << op->down()->getTreeName()
+        << " " << op->down()->right()->getTreeName() << "\n";
 }
 
 static void genJmp(Tree *op)
 {
-    TreeIterator it(op);
-    it.down();
-    Tree *first = *it;
-    it.right();
-    Tree *second = *it;
     std::cout << "JMP "
-        << first->getTreeName()
-        << " " << second->getTreeName() << "\n";
+        << op->down()->getTreeName()
+        << " " << op->down()->right()->getTreeName() << "\n";
 }
 
 static void genBinary(Tree *op)
 {
-    TreeIterator it(op);
-    it.down();
-    Tree *first = *it;
-    it.right();
-    Tree *second = *it;
-    it.right();
-    Tree *third = *it;
     std::cout << op->getTreeName()
-        << " " << first->getTreeName()
-        << " " << second->getTreeName()
-        << " " << third->getTreeName() << "\n";
+        << " " << op->down()->getTreeName()
+        << " " << op->down()->right()->getTreeName()
+        << " " << op->down()->right()->right()->getTreeName() << "\n";
 }
 
 static void genUnary(Tree *op)
 {
-    TreeIterator it(op);
-    it.down();
-    Tree *first = *it;
-    it.right();
-    Tree *second = *it;
     std::cout << op->getTreeName()
-        << " " << first->getTreeName()
-        << " " << second->getTreeName() << "\n";
+        << " " << op->down()->getTreeName()
+        << " " << op->down()->right()->getTreeName() << "\n";
 }
 
 static void genFunc(Tree *f)
 {
     std::cout << f->get<std::string>() << ":\n";
-    TreeIterator op(f);
-    op.down();
-    while (*op)
+    Tree *op = f->down();
+    while (op)
     {
-        switch ((*op)->getType())
+        switch (op->getType())
         {
         case TreeType::LABEL:
-            genLabel(*op);
+            genLabel(op);
             break;
         case TreeType::MOV:
-            genAssign(*op);
+            genAssign(op);
             break;
         case TreeType::JMP:
-            genJmp(*op);
+            genJmp(op);
             break;
         case TreeType::ADC:
         case TreeType::ADD:
         case TreeType::SBC:
         case TreeType::SUB:
-            genBinary(*op);
+            genBinary(op);
             break;
         case TreeType::SHR:
-            genUnary(*op);
+            genUnary(op);
             break;
         default:
             assert(false);
         }
-        op.right();
+        op = op->right();
     }
 }
 
 void codegen(Tree *root)
 {
     std::cout << "Generated code:\n";
-    TreeIterator f(root);
-    f.down();
-    while (*f)
+    Tree *f = root->down();
+    while (f)
     {
-        assert((*f)->getType() == TreeType::FUNC);
-        genFunc(*f);
-        f.right();
+        assert(f->getType() == TreeType::FUNC);
+        genFunc(f);
+        f = f->right();
     }
 }

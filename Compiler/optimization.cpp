@@ -9,16 +9,14 @@ void makeCopyPropagation(CodeGraphList *graph)
             Tree *tree = node->info;
             if (tree->getType() == TreeType::ASSIGN)
             {
-                TreeIterator left(tree);
-                left.down();
-                TreeIterator right(left);
-                right.right().down();
-                left.down();
-                while (*left && *right)
+                Tree *left = tree->down();
+                Tree *right = left->right()->down();
+                left = left->down();
+                while (left && right)
                 {
                     // need SSA here, can't propagate yet
-                    left.right();
-                    right.right();
+                    left = left->right();
+                    right = right->right();
                 }
             }
         }

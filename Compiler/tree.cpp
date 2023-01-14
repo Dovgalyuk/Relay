@@ -4,42 +4,70 @@
 Tree *Tree::clone()
 {
     Tree *res = new Tree(this);
-    for (auto c : children)
+    Tree *c = child;
+    while (c)
     {
         res->addChild(c->clone());
+        c = c->next;
     }
     return res;
 }
 
 void Tree::addFirstChild(Tree *n)
 {
-    children.push_front(n);
+    n->prev = nullptr;
     n->parent = this;
+    if (child)
+    {
+        child->prev = n;
+    }
+    n->next = child;
+    child = n;
 }
 
 void Tree::addChild(Tree *n)
 {
-    children.push_back(n);
     n->parent = this;
+    n->next = nullptr;
+    n->prev = nullptr;
+    if (child)
+    {
+        Tree *last = child;
+        while (last->next)
+        {
+            last = last->next;
+        }
+        last->next = n;
+        n->prev = last;
+    }
+    else
+    {
+        child = n;
+    }
 }
 
 void Tree::printTree(int level) const
 {
     std::cout << std::string(level, ' ')
         << getTreeName() << '\n';
-    for (auto c : children)
+    Tree *c = child;
+    while (c)
     {
         c->printTree(level + 2);
+        c = c->next;
     }
 }
 
 void Tree::merge(Tree *n)
 {
-    for (auto c : n->children)
+    Tree *c = n->child;
+    while (c)
     {
+        Tree *next = c->next;
         addChild(c);
+        c = next;
     }
-    n->children.clear();
+    n->child = nullptr;
     delete n;
 }
 
@@ -58,6 +86,8 @@ std::string Tree::getTreeName() const
         return "Int " + std::to_string(std::get<int>(value));
     case TreeType::VAR:
         return "Var" + std::to_string(std::get<int>(value));
+    case TreeType::SYMBOL:
+        return "Sym" + std::to_string(std::get<int>(value));
     case TreeType::FUNC:
         return "Function " + std::get<std::string>(value);
     case TreeType::LABEL:
