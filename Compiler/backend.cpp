@@ -104,9 +104,11 @@ static void processCmp(Tree *func, Tree *op)
 
 static void processLShift(Tree *func, Tree *op)
 {
-    Tree *left = op->down()->down();
+    Tree *left = op->down();
+    Tree *right = left->right()->down();
+    left = left->down();
     bool first = true;
-    while (left)
+    while (left && right)
     {
         if (left->getType() == TreeType::INT)
         {
@@ -116,12 +118,13 @@ static void processLShift(Tree *func, Tree *op)
         {
             Tree *add = new Tree(first ? TreeType::ADD : TreeType::ADC);
             add->addChild(new Tree(left));
-            add->addChild(new Tree(left));
-            add->addChild(new Tree(left));
+            add->addChild(new Tree(right));
+            add->addChild(new Tree(right));
             func->addChild(add);
             first = false;
         }
         left = left->right();
+        right = right->right();
     }
 }
 
@@ -130,7 +133,10 @@ static void processRShift(Tree *func, Tree *op)
     Tree *left = op->down()->down();
     while (left->right())
         left = left->right();
-    while (left)
+    Tree *right = op->down()->right()->down();
+    while (right->right())
+        right = right->right();
+    while (left && right)
     {
         if (left->getType() == TreeType::INT)
         {
@@ -140,10 +146,11 @@ static void processRShift(Tree *func, Tree *op)
         {
             Tree *shr = new Tree(TreeType::SHR);
             shr->addChild(new Tree(left));
-            shr->addChild(new Tree(left));
+            shr->addChild(new Tree(right));
             func->addChild(shr);
         }
         left = left->left();
+        right = right->left();
     }
 }
 

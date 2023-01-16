@@ -130,6 +130,8 @@ std::string Tree::getTreeName() const
         return "Sym" + std::to_string(std::get<int>(value));
     case TreeType::FUNC:
         return "Function " + std::get<std::string>(value);
+    case TreeType::ARGS:
+        return "Args";
     case TreeType::LABEL:
         return "Label" + std::to_string(std::get<int>(value));
     case TreeType::LIST:
@@ -177,7 +179,7 @@ std::string Tree::getTreeName() const
         return "NEQUAL";
 
     case TreeType::REG:
-        return std::string(1, (char)get<int>());
+        return "R" + std::to_string(get<int>());
     case TreeType::MOV:
         return "MOV";
     case TreeType::JMP:

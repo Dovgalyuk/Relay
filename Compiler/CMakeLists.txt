@@ -12,6 +12,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(compiler main.cpp tree.cpp middleend.cpp backend.cpp codegen.cpp
-               objects.cpp optimization.cpp graph.cpp
+               objects.cpp optimization.cpp graph.cpp allocation.cpp
                ${BISON_Parser_OUTPUTS} ${FLEX_Scanner_OUTPUTS})
 set_property(TARGET compiler PROPERTY CXX_STANDARD 17)

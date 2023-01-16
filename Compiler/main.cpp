@@ -31,8 +31,9 @@ int main(int argc, char *argv[])
         std::cout << "=== Created variables:\n";
         root->print();
         // optimize assignments
-        codeGraph = createCodeGraph(root);
-        makeCopyPropagation(codeGraph);
+        makeCopyPropagation(root);
+        std::cout << "=== After copy propagation:\n";
+        root->print();
         // remove dead code
         // allocate variables
         // transform code to instruction level

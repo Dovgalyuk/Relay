@@ -170,19 +170,41 @@ static void processReturn(Tree *func, Tree *op)
 static Tree *processLShift(Tree *func, Tree *op)
 {
     Tree *res = new Tree(TreeType::LSHIFT);
-    res->addChild(op->down()->clone());
+    Tree *temp = createTempVar(op->down(), nullptr);
+    res->addChild(temp);
     res->addChild(op->down()->clone());
     func->addChild(res);
-    return res->down();
+    Tree *assign = new Tree(TreeType::ASSIGN,
+        op->down()->clone(), temp->clone());
+    func->addChild(assign);
+    return temp;
 }
 
 static Tree *processRShift(Tree *func, Tree *op)
 {
     Tree *res = new Tree(TreeType::RSHIFT);
-    res->addChild(op->down()->clone());
+    Tree *temp = createTempVar(op->down(), nullptr);
+    res->addChild(temp);
     res->addChild(op->down()->clone());
     func->addChild(res);
-    return res->down();
+    Tree *assign = new Tree(TreeType::ASSIGN,
+        op->down()->clone(), temp->clone());
+    func->addChild(assign);
+    return temp;
+}
+
+static void processArgs(Tree *func, Tree *st)
+{
+    int reg = 1;
+    for (st = st->down() ; st ; st = st->right(), ++reg)
+    {
+        Tree *assign = new Tree(TreeType::ASSIGN);
+        assign->addChild(new Tree(TreeType::LIST, st->clone()));
+        assign->addChild(new Tree(TreeType::LIST,
+            new Tree(reg, TreeType::REG)));
+        func->addChild(assign);
+    }
+    assert(reg < 7);
 }
 
 static void processStatement(Tree *func, Tree *st)
@@ -191,6 +213,9 @@ static void processStatement(Tree *func, Tree *st)
     {
     case TreeType::SCOPE:
         processScope(func, st);
+        break;
+    case TreeType::ARGS:
+        processArgs(func, st);
         break;
     case TreeType::ASSIGN:
         processAssign(func, st);

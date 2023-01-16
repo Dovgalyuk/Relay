@@ -13,6 +13,7 @@ enum class TreeType
     VAR,
     SYMBOL,
     FUNC,
+    ARGS,
     LABEL,
     LIST,
     SCOPE,
@@ -129,6 +130,7 @@ public:
     void print(int level = 0) const;
 
     template <typename T> T get() const { return std::get<T>(value); }
+    template <typename T> void set(const T &t) { value = t; }
 
 private:
     void printTree(int level) const;

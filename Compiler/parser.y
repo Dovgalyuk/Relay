@@ -48,12 +48,13 @@ functions:
 function:
     T_FUNC T_L_PARENT function_args T_R_PARENT
     code_block
-    { $$ = $1; $$->addChild($5); }
+    { $$ = $1; $5->addFirstChild($3); $$->addChild($5); }
 ;
 
 function_args:
-    /* empty */
+    /* empty */ { $$ = new Tree(TreeType::ARGS); }
     | T_VAR function_args
+      { $$ = $2; $$->addFirstChild($1); }
 ;
 
 code_block:
