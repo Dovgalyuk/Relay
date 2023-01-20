@@ -2,6 +2,10 @@
 
 ## Language features
 
+No recursion
+
+No variable scopes
+
 ### Types
 
 int - signed byte value

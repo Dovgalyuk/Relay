@@ -14,6 +14,8 @@ Schematic for representing the relays was taken from Harry Porter's page:
 
 [Memory schematic](schematic_memory.md)
 
+[Peripheral schematic](schematic_peripheral.md)
+
 ## Blocks interconnections
 
 Computer contains several blocks:
@@ -195,3 +197,31 @@ All interconnections are made with 25-wire cables and D-sub connector.
 * 20 - WR_MEM
 * 21-24 - NC
 * 25 - GND
+
+### Memory - Teletype I
+
+* 1 - A
+* 2 - B
+* 3 - C
+* 4 - D
+* 5 - E
+* 6 - F
+* 7 - G
+* 8 - H
+* 9 - I
+* 10 - J
+* 11 - K
+* 12 - L
+* 13 - M
+* 14 - N
+* 15 - O
+* 16 - P
+* 17 - NC
+* 18 - S
+* 19-25 - NC
+
+### Memory - Teletype IV
+
+* 1-12 - NC
+* 13 - M
+* 14-25 - NC
