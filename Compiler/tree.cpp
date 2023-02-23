@@ -49,7 +49,12 @@ void Tree::addChild(Tree *n)
 void Tree::printTree(int level) const
 {
     std::cout << std::string(level, ' ')
-        << getTreeName() << '\n';
+        << getTreeName();
+    if (flags & FLAG_DEF)
+        std::cout << " DEF";
+    if (flags & FLAG_USE)
+        std::cout << " USE";
+    std::cout << '\n';
     Tree *c = child;
     while (c)
     {

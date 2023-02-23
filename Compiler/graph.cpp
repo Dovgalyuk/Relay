@@ -2,7 +2,7 @@
 #include <cassert>
 #include "graph.h"
 
-CodeGraph *createFunctionGraph(Tree *func)
+static CodeGraph *createFunctionGraph(Tree *func, bool reverse = false)
 {
     std::map<int, CodeGraph::Node*> labels;
     std::map<Tree*, CodeGraph::Node*> nodes;
@@ -24,7 +24,14 @@ CodeGraph *createFunctionGraph(Tree *func)
             TreeType pt = prev->info->getType();
             if (pt != TreeType::GOTO && pt != TreeType::RETURN)
             {
-                prev->addNext(node);
+                if (reverse)
+                {
+                    node->addNext(prev);
+                }
+                else
+                {
+                    prev->addNext(node);
+                }
             }
         }
         prev = node;
@@ -45,14 +52,21 @@ CodeGraph *createFunctionGraph(Tree *func)
             CodeGraph::Node *labelNode = labels[label];
             assert(labelNode);
             CodeGraph::Node *current = nodes[it];
-            current->addNext(labelNode);
+            if (reverse)
+            {
+                labelNode->addNext(current);
+            }
+            else
+            {
+                current->addNext(labelNode);
+            }
         }
         it = it->right();
     }
     return graph;
 }
 
-CodeGraphList *createCodeGraph(Tree *root)
+CodeGraphList *createCodeGraphs(Tree *root)
 {
     CodeGraphList *graph = new CodeGraphList;
     Tree *it = root->down();
@@ -68,4 +82,14 @@ template<>
 void Graph<Tree*>::Node::printInfo()
 {
     info->print(4);
+}
+
+CodeGraph *createCodeGraph(Tree *root)
+{
+    return createFunctionGraph(root, false);
+}
+
+CodeGraph *createReverseCodeGraph(Tree *root)
+{
+    return createFunctionGraph(root, true);
 }

@@ -666,3 +666,110 @@ num2reg:
     SHR S, S
     MOV PC, L
 ```
+
+### Lonely queen
+
+Trying to move chess queen into the lower left corner by
+moving it left and down.
+
+Initial position:
+```
+800000000
+700000100
+600000000
+500000000
+400000000
+300000000
+200000000
+100000000
+012345678
+```
+
+```
+@check_end(x, y, p)
+{
+    // print field
+    i = 8;
+    while (i > 0)
+    {
+        PRINT(i);
+        j = 1;
+        while (j < 9)
+        {
+            if (i == y && j == x)
+                PRINT(1);
+            else
+                PRINT(0);
+            j += 1;
+        }
+        i -= 1;
+        PRINT('\n');
+    }
+    j = 0;
+    while (j < 9)
+    {
+        PRINT(j);
+        j += 1;
+    }
+    PRINT('\n');
+    // check game end
+    if (x == 1 && y == 1)
+    {
+        PRINT(p);
+        PRINT('\n');
+        HALT;
+    }
+}
+
+@main()
+{
+    x = 6;
+    y = 7;
+    while (1)
+    {
+        @check_end(x, y, 2);
+        // player's move
+        do
+        {
+            a = INPUT();
+            b = INPUT();
+        }
+        while (a >= x || b >= y || !(a == b || !a || !b) || !(a | b));
+        x -= a;
+        y -= b;
+        @check_end(x, y, 1);
+        // computer's move
+        // TODO: choose move
+        if (x > 1)
+            x -= 1;
+        else
+            y -= 1;
+    }
+}
+```
+
+## Demos
+
+### Sine wave
+
+```
+..x.....
+.x.x....
+x...x...
+.....x.x
+......x.
+```
+```
+    MOVI A, 0b00100000 ; 00: 10000000 00100000
+    MOVI B, 0b01010000 ; 01: 10000001 01010000
+    MOVI C, 0b10001000 ; 02: 10000010 10001000
+    MOVI D, 0b00000101 ; 03: 10000011 00000101
+    MOVI M, 0b00000010 ; 04: 10000100 00000010
+Loop:
+    ROR A, A           ; 05: 01111000 00001010
+    ROR B, B           ; 06: 01111001 00011010
+    ROR C, C           ; 07: 01111010 00101010
+    ROR D, D           ; 08: 01111011 00111010
+    ROR M, M           ; 09: 01111100 01001010
+    JMP Loop           ; 0a: 10000111 00000101
+```

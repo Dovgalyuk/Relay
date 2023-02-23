@@ -5,6 +5,7 @@
 #include "backend.h"
 #include "codegen.h"
 #include "optimization.h"
+#include "allocation.h"
 
 Tree *root;
 
@@ -20,7 +21,7 @@ int main(int argc, char *argv[])
         std::cout << "=== 3-address tree:\n";
         root->print();
         // create scopes and variables and convert to SSA
-        CodeGraphList *codeGraph = createCodeGraph(root);
+        CodeGraphList *codeGraph = createCodeGraphs(root);
         std::cout << "=== control flow graphs:\n";
         for (auto g : *codeGraph)
         {
@@ -31,11 +32,14 @@ int main(int argc, char *argv[])
         std::cout << "=== Created variables:\n";
         root->print();
         // optimize assignments
-        makeCopyPropagation(root);
-        std::cout << "=== After copy propagation:\n";
-        root->print();
+        // makeCopyPropagation(root);
+        // std::cout << "=== After copy propagation:\n";
+        // root->print();
         // remove dead code
         // allocate variables
+        simpleAllocation(root);
+        std::cout << "=== After allocation:\n";
+        root->print();
         // transform code to instruction level
         root = makeInstructions(root);
         std::cout << "=== Instructions:\n";

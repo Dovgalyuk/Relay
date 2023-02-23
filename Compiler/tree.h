@@ -57,6 +57,12 @@ enum class TreeType
     SHR,
 };
 
+enum
+{
+    FLAG_DEF = 0x00000001,
+    FLAG_USE = 0x00000002,
+};
+
 class Tree;
 typedef std::list<Tree*> Trees;
 
@@ -65,7 +71,7 @@ class Tree
 public:
     Tree()
         : parent(nullptr), prev(nullptr), next(nullptr), child(nullptr),
-          type(TreeType::NONE)
+          type(TreeType::NONE), flags(0)
     {}
     explicit Tree(int v, TreeType t = TreeType::INT)
         : Tree()
@@ -132,6 +138,9 @@ public:
     template <typename T> T get() const { return std::get<T>(value); }
     template <typename T> void set(const T &t) { value = t; }
 
+    bool checkFlag(uint32_t flag) { return flags & flag; }
+    void setFlag(uint32_t flag) { flags |= flag; }
+
 private:
     void printTree(int level) const;
 
@@ -143,6 +152,7 @@ private:
 
     Tree *parent, *prev, *next, *child;
     TreeType type;
+    uint32_t flags;
 };
 
 #endif

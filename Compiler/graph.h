@@ -87,6 +87,8 @@ private:
 typedef Graph<Tree*> CodeGraph;
 typedef std::list<CodeGraph*> CodeGraphList;
 
-CodeGraphList *createCodeGraph(Tree *root);
+CodeGraphList *createCodeGraphs(Tree *root);
+CodeGraph *createCodeGraph(Tree *root);
+CodeGraph *createReverseCodeGraph(Tree *func);
 
 #endif

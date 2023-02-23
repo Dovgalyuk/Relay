@@ -274,6 +274,7 @@ Tree *makeOperations(Tree *root)
 static void createVariablesFunc(CodeGraph *graph, Tree *func)
 {
     typedef std::map<int, Trees> AllVars;
+    // Variables coming to labels
     std::map<CodeGraph::Node*, AllVars> nodeVars;
     typedef std::map<int, Tree*> Vars;
     // collect variables
@@ -290,12 +291,15 @@ static void createVariablesFunc(CodeGraph *graph, Tree *func)
                 for (auto &vv : vars)
                 {
                     Trees &dest = nodeVars[node][vv.first];
+                    // new SSA var
                     if (dest.empty())
                     {
                         dest.push_back(createTemp());
                         // add symbol for reference
                         dest.front()->addChild(new Tree(vv.second->down()));
                     }
+                    // label contains all incoming values
+                    //tree->addChild(vv.second->clone());
                     dest.push_back(vv.second);
                     vv.second = dest.front();
                 }
@@ -325,18 +329,29 @@ static void createVariablesFunc(CodeGraph *graph, Tree *func)
         {
             Tree *phiNode = new Tree(TreeType::PHI);
             for (auto t : vt.second)
+            {
+                // phi collects the values
                 phiNode->addChild(t->clone());
+            }
             nv.first->info->insertRight(phiNode);
         }
     }
     // replace usages
+    // TODO: loop to vars
     Vars phi;
     for (Tree *st = func->down() ; st ; st = st->right())
     {
         Tree *op = st->down();
         if (op && st->getType() != TreeType::CMP
-            && st->getType() != TreeType::RETURN)
+            && st->getType() != TreeType::RETURN
+            && st->getType() != TreeType::LABEL)
         {
+            // Tree *v = op;
+            // if (v->getType() == TreeType::LIST)
+            // {
+            //     v = v->down();
+            // }
+            // v->setFlag(FLAG_DEF);
             op = op->right();
         }
         for ( ; op ; op = op->right())
@@ -359,10 +374,15 @@ static void createVariablesFunc(CodeGraph *graph, Tree *func)
                     {
                         n = n->clone();
                     }
+                    // n->setFlag(FLAG_USE);
                     v->replaceWith(n);
                     std::swap(v, n);
                     delete n;
                 }
+                // else if (v->getType() == TreeType::VAR)
+                // {
+                //     v->setFlag(FLAG_USE);
+                // }
             }
         }
         if (st->getType() == TreeType::PHI)
