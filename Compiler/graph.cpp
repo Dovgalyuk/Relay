@@ -84,6 +84,19 @@ void Graph<Tree*>::Node::printInfo()
     info->print(4);
 }
 
+template<>
+void Graph<int>::Node::printInfo()
+{
+    std::cout << "\tid: " << info
+        << " color: " << color << "\n";
+}
+
+template<>
+void Graph<int>::Node::printLink()
+{
+    std::cout << info << " ";
+}
+
 CodeGraph *createCodeGraph(Tree *root)
 {
     return createFunctionGraph(root, false);

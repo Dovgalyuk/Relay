@@ -26,14 +26,27 @@ public:
         {
         }
 
+        void printLink()
+        {
+            std::cout << this << " ";
+        }
+
         void addNext(Node *n)
         {
+            for (auto link : links)
+            {
+                if (link == n)
+                {
+                    return;
+                }
+            }
             links.push_back(n);
         }
 
         bool visited;
+        int color;
         T info;
-    private:
+    //private:
         Nodes links;
     };
 
@@ -59,7 +72,7 @@ public:
             std::cout << "Node " << n << " ->";
             for (auto next : n->links)
             {
-                std::cout << " " << next;
+                next->printLink();
             }
             std::cout << "\n";
             n->printInfo();

@@ -6,11 +6,63 @@
 typedef std::set<int> Vars;
 typedef std::map<Tree *, Vars> NodeVars;
 typedef Graph<int> VariableGraph;
+typedef VariableGraph::Node VariableNode;
+typedef std::map<int, VariableNode*> VariableNodes;
+
+static VariableNode *variableNode(int var, VariableNodes &nodes, VariableGraph *graph)
+{
+    VariableNode *node = nodes[var];
+    if (!node)
+    {
+        node = graph->addNode(var);
+        nodes[var] = node;
+    }
+    return node;
+}
+
+static void colorGraph(VariableGraph *graph)
+{
+    for (VariableNode *n : graph->getNodes())
+    {
+        if (!n->visited)
+        {
+            graph->dfs(n, 0, [](VariableNode *node, int unused) {
+                Vars colors;
+                for (VariableNode *link : node->links)
+                {
+                    if (link->visited)
+                    {
+                        colors.insert(link->color);
+                    }
+                }
+            });
+        }
+    }
+}
 
 VariableGraph *buildVariableGraph(const NodeVars &live)
 {
+    VariableNodes nodes;
     VariableGraph *graph = new VariableGraph;
-    for 
+    for (auto nv : live)
+    {
+        const Vars &v = nv.second;
+        for (int var : v)
+        {
+            VariableNode *node1 = variableNode(var, nodes, graph);
+            // add links
+            for (int var2 : v)
+            {
+                if (var != var2)
+                {
+                    VariableNode *node2 = variableNode(var2, nodes, graph);
+                    node1->addNext(node2);
+                    node2->addNext(node1);
+                }
+            }
+        }
+    }
+    return graph;
 }
 
 void simpleAllocationFunction(Tree *func)
@@ -195,9 +247,15 @@ void simpleAllocationFunction(Tree *func)
     }
 
     // build variable graph
-
+    VariableGraph *varGraph = buildVariableGraph(liveVars);
 
     // allocate registers
+    colorGraph(varGraph);
+
+    std::cout << "=== Variable graph:\n";
+    varGraph->print();
+
+    delete varGraph;
 }
 
 void simpleAllocation(Tree *root)
