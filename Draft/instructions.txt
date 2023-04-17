@@ -1,0 +1,32 @@
+1 bit = 1
+
+CALL Imm         1ccc1111 aaaaaaaa
+JMP Cond, Imm    1ccc0111 aaaaaaaa
+MOV Gd, Imm8     1ccc0ddd iiiiiiii
+
+else 2 bit = 1
+
+OP Gd, Gs1, Gs2  01bbbddd ixxxryyy b - operation
+                                   i - интерпретировать y как Imm3
+                                   r - записывать ли результат
+OP Gd, Gs        01111ddd -sssruu0 u - operation
+
+else 3 bit = 1
+
+LOAD G, P        00101ddd -----aaa
+LOAD G, Imm      00100ddd iiiiiiii
+STORE G, P       00111sss -----aaa
+STORE G, Imm     00110sss iiiiiiii
+
+MOV Gd, Gs       00011ddd -----sss A, B, C, D, M1, M0, L, PC
+
+HALT             00010--- --------
+NOP              00000--- --------
+
+
+
+Obsolete
+
+MOV Pd, Imm12    011diiii iiiiiiii M, L
+INC W            000001dd --------
+MOV Wd, Ws       00010-dd ---ss--- CD, M, LR, PC

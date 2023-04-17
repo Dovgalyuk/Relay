@@ -1,0 +1,62 @@
+Fetch - IncPC - Exec
+Fetch:
+          1234567890
+SEL PC   _AAA_______
+SEL MEMA _AAA_______
+RD MEM   _--________
+SEL MEMD __D________
+LD INSTR _-_________
+SEL INSTR__D________
+LD INC   _-_________
+SEL INC  __A__A_____
+LD PC/L  ____-______
+SEL PC/L _____A_____
+  MOV Gd, Gs (6)
+LD Gd    ____-______
+SEL Gd   _____D_____
+SEL Gs   _____D_____
+  MOV Wd, Ws (6)
+LD Wd    ____-______
+SEL Wd   _____D_____
+SEL Ws   _____D_____
+  MOV Gd, Imm8 (6)
+LD Gd    ____-______
+SEL Gd   _____D_____
+SEL INSTR_____D_____
+  OP Gd, Gs1[, Gs2] (9)
+SEL Gs1  ____DDD____
+SEL Gs2/I____DDD____
+SEL ALU  ____--_____
+LD RES   ____-______
+LD Gd    _______-___
+SEL RES  ________D__
+SEL Gd   ________D__
+  MOV Pd, Imm12 (6)
+LD Pd    ____-______
+SEL Pd   _____D_____
+SEL INSTR_____D_____
+  LOAD G, P/Ph:Imm7 (10)
+LD G     ____-______
+SEL P/.. _______AAA_
+SEL MEMA _______AAA_
+RD MEM   _______--__
+SEL MEMD ________DD_
+SEL G    ________DD_
+  STORE G, P/Ph:Imm7 (10)
+SEL P/.. _______AAA_
+SEL MEMA _______AAA_
+WR MEM   _______--__
+SEL MEMD ________DD_
+SEL G    ________DD_
+  JMP Cond, Imm (6)
+  CALL Imm
+SEL INSTR_____A_____ (גלוסעמ INC)
+  INC W
+LD INC   ______-____
+SEL INCI _______A___
+SEL W    _______A___
+LD W     ________-__
+SEL INCO _________A_
+SEL W    _________A_
+  HALT (6)
+HALT     ____-______
