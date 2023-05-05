@@ -21,7 +21,7 @@ CPU has 3 flags:
 * 0x00 - 0x3f: program data
 * 0x40 - 0x7f: reserved for program data
 * 0x80 - 0x8f: two 8-bit input switches (first for even addresses and second for odd)
-* 0x90 - 0x9f: teletype
+* 0x90 - 0x9f: teletype (input - keyboard, output - printing)
 * 0xa0 - 0xff: unused (read as 0)
 
 ## Instructions set
