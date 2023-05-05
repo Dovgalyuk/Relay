@@ -7,3 +7,11 @@ Decoded only 4 LS bits of the output value:
 * F - carriage return
 
 ![](/Schemes/Teletype output.png)
+
+## Teletype input register
+
+Reads 4 LS bits of the key pressed on the teletype.
+Also sends INT signal to the Control block, which allows to continue
+program execution, when CPU is halted.
+
+![](/Schemes/Teletype input.png)

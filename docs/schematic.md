@@ -170,7 +170,8 @@ All interconnections are made with 25-wire cables and D-sub connector.
 * 2 - RD_MEM
 * 3 - SEL_MEMD
 * 4 - WR_MEM
-* 5-24 - NC
+* 5 - INT
+* 6-24 - NC
 * 25 - GND
 
 ### Memory - RAM/Display
@@ -222,6 +223,14 @@ All interconnections are made with 25-wire cables and D-sub connector.
 
 ### Memory - Teletype IV
 
-* 1-12 - NC
+* 1 - A
+* 2 - B
+* 3 - C
+* 4 - NC
+* 5 - E
+* 6 - F
+* 7 - G
+* 8 - H
+* 9-12 - NC
 * 13 - M
 * 14-25 - NC
