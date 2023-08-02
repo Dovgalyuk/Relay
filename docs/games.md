@@ -271,7 +271,7 @@ Numbering of the cells:
         m = move_left(m);
         p = input();
         check_win(m, p);
-        win(m - 1);
+        win(m - 1); // & 7?
     }
     m = move_left(p);
     p = input();
@@ -283,6 +283,62 @@ Numbering of the cells:
     PRINT(9);
     HALT();
 }
+```
+
+```
+main:
+    MOVI A, 8       00: 10000000 00001000
+    STORE A, 0x90   01: 00110000 10010000
+    HALT            02: 00010000 00000000
+    LOAD A, 0x90    03: 00100000 10010000
+    STORE A, 0x90   04: 00110000 10010000
+    CALL move_left  05: 10001111 00011100
+    MOV C, A        06: 00011010 00000000
+    CALL load       07: 10001111 00101010
+    CALL check_win  08: 10001111 00100000
+    TST C, 1        09: 01100000 10100001
+    JMP NZ, tie     0a: 11100111 00010010
+    MOV A, C        0b: 00011000 00100000
+    CALL move_left  0c: 10001111 00011100
+    MOV C, A        0d: 00011010 00000000
+    CALL load       0e: 10001111 00101010
+    CALL check_win  0f: 10001111 00100000
+    SUB A, C, 1     10: 01011000 10101001
+    JMP win         11: 10000111 00100101
+tie:
+    MOV A, B        12: 00011000 00010000
+    CALL move_left  13: 10001111 00011100
+    CALL load       14: 10001111 00101010
+    CALL check_win  15: 10001111 00100000
+    MOV A, B        16: 00011000 00010000
+    CALL move_left  17: 10001111 00011100
+    CALL load       18: 10001111 00101010
+    CALL check_win  19: 10001111 00100000
+    MOVI A, 9       1a: 10000000 00001001
+    STORE A, 0x90
+    HALT            1b: 00010000 00000000
+move_left:
+    SUB A, A, 1     1c: 01011000 10001001
+    AND A, A, 7     1d: 01100000 10001111
+    STORE A, 0x90   1e: 00110000 10010000
+    RET             1f: 00011111 01100000
+check_win:
+    ADD A, A, 4     20: 01001000 10001100
+    AND A, A, 7     21: 01100000 10001111
+    CMP A, B        22: 01011000 00000001
+    JMP NZ, win     23: 11100111 00100101
+    RET             24: 00011111 01100000
+win:
+    STORE A, 0x90   25: 00110000 10010000
+    MOVI A, 9       26: 10000000 00001001
+    STORE A, 0x90   27: 00110000 10010000
+    STORE A, 0x90   28: 00110000 10010000
+    HALT            29: 00010000 00000000
+load:
+    HALT            2a: 00010000 00000000
+    LOAD B, 0x90    2b: 00100001 10010000
+    STORE B, 0x90   2c: 00110001 10010000
+    RET             2d: 00011111 01100000
 ```
 
 ### Lonely queen

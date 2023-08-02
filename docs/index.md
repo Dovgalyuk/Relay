@@ -8,6 +8,8 @@
 
 [Construction](construction.md)
 
+[Programmer's cheat sheet](cheatsheet.md)
+
 [Sample programs](programs.md)
 
 [Comparison of modern relay computers](computers.md)
