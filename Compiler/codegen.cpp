@@ -29,11 +29,23 @@ static void genBinary(Tree *op)
         << " " << op->down()->right()->right()->getTreeName() << "\n";
 }
 
+static void genStore(Tree *op)
+{
+    std::cout << op->getTreeName()
+        << " " << op->down()->getTreeName()
+        << " " << op->down()->right()->getTreeName() << "\n";
+}
+
 static void genUnary(Tree *op)
 {
     std::cout << op->getTreeName()
         << " " << op->down()->getTreeName()
         << " " << op->down()->right()->getTreeName() << "\n";
+}
+
+static void genHalt(Tree *op)
+{
+    std::cout << op->getTreeName() << "\n";
 }
 
 static void genFunc(Tree *f)
@@ -61,6 +73,12 @@ static void genFunc(Tree *f)
             break;
         case TreeType::SHR:
             genUnary(op);
+            break;
+        case TreeType::STORE:
+            genStore(op);
+            break;
+        case TreeType::HALT:
+            genHalt(op);
             break;
         default:
             assert(false);

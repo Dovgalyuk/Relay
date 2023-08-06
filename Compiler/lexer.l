@@ -16,12 +16,14 @@ VAR      [a-z]
 %%
 
 {DIGIT}+ { yylval = new Tree(atoi(yytext)); return T_INT; }
-"0x"{HEX}+ return T_INT; // TODO
+"0x"{HEX}+ { yylval = new Tree((int)strtoul(yytext, NULL, 0)); return T_INT; }
 "0b"{BIN}+ return T_INT; // TODO
 {VAR}    { yylval = new Tree(yytext[0]); return T_VAR; }
 "@"[a-z0-9]+  { yylval = new Tree(strdup(yytext + 1)); return T_FUNC; }
 
 "="      return T_ASSIGN;
+"+="     return T_PLUS_ASSIGN;
+"-="     return T_MINUS_ASSIGN;
 
 "+"      return T_PLUS;
 "-"      return T_MINUS;
@@ -56,6 +58,9 @@ WHILE    return T_WHILE;
 DO       return T_DO;
 ARRAY    return T_ARRAY;
 RETURN   return T_RETURN;
+OUT      return T_OUT;
+IN       return T_IN;
+HALT     return T_HALT;
 
 "("      return T_L_PARENT;
 ")"      return T_R_PARENT;

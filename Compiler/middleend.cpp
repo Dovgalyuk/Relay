@@ -5,17 +5,53 @@
 static void processAssign(Tree *func, Tree *op);
 static void processStatement(Tree *func, Tree *st);
 static void processScope(Tree *func, Tree *sc);
-static Tree *processLShift(Tree *func, Tree *op);
-static Tree *processRShift(Tree *func, Tree *op);
+static Tree *processShift(Tree *func, Tree *op, TreeType t);
+static Tree *processModify(Tree *func, Tree *op, TreeType t);
+
+static Tree *processList(Tree *func, Tree *list, bool addr)
+{
+    Tree *res = new Tree(list);
+    for (Tree *it = list->down() ; it ; it = it->right())
+    {
+        switch (it->getType())
+        {
+        case TreeType::VAR:
+        case TreeType::SYMBOL:
+            res->addChild(it->clone());
+            break;
+        case TreeType::INT:
+            {
+                int val = it->get<int>();
+                int max = addr ? 255 : 7;
+                if (val < 0 || val > max)
+                {
+                    Tree *temp = createTemp();
+                    res->addChild(temp);
+                    Tree *assign = new Tree(TreeType::ASSIGN,
+                        new Tree(TreeType::LIST, temp->clone()),
+                        new Tree(TreeType::LIST, it->clone()));
+                    func->addChild(assign);
+                }
+                else
+                {
+                    res->addChild(it->clone());
+                }
+            }
+            break;
+        default:
+            assert(0);
+        }
+    }
+    return res;
+}
 
 // returns LIST of the variables/consts
-static Tree *processExpr(Tree *func, Tree *expr)
+static Tree *processExpr(Tree *func, Tree *expr, bool addr = false)
 {
     switch (expr->getType())
     {
     case TreeType::LIST:
-        // don't reallocate
-        return expr;
+        return processList(func, expr, addr);
     case TreeType::ADD:
     case TreeType::SUB:
         {
@@ -30,9 +66,13 @@ static Tree *processExpr(Tree *func, Tree *expr)
             return res->clone();
         }
     case TreeType::LSHIFT:
-        return processLShift(func, expr)->clone();
+        return processShift(func, expr, TreeType::LSHIFT)->clone();
     case TreeType::RSHIFT:
-        return processRShift(func, expr)->clone();
+        return processShift(func, expr, TreeType::RSHIFT)->clone();
+    case TreeType::ADD_ASSIGN:
+        return processModify(func, expr, TreeType::ADD)->clone();
+    case TreeType::SUB_ASSIGN:
+        return processModify(func, expr, TreeType::SUB)->clone();
     default:
         assert(0);
     }
@@ -47,9 +87,21 @@ static void processAssign(Tree *func, Tree *op)
     func->addChild(res);
 }
 
+static void processOut(Tree *func, Tree *op)
+{
+    Tree *res = new Tree(TreeType::OUT);
+    // TODO: address calculation
+    res->addChild(processExpr(func, op->down(), true));
+    res->addChild(processExpr(func, op->down()->right()));
+    func->addChild(res);
+}
+
 static void processSimpleCond(Tree *func, Tree *cond, Tree *label_then, Tree *label_else)
 {
-    processExpr(func, cond->down());
+    /* can have side effects */
+    if (cond->down()) {
+        processExpr(func, cond->down());
+    }
     // add if
     Tree *if_op = new Tree(TreeType::IF);
     switch (cond->getType())
@@ -61,9 +113,9 @@ static void processSimpleCond(Tree *func, Tree *cond, Tree *label_then, Tree *la
         if_op->addChild(new Tree(TreeType::CARRY));
         break;
     case TreeType::ZERO:
-        if_op->addChild(new Tree(TreeType::NZERO));
+        if_op->addChild(new Tree(TreeType::NONZERO));
         break;
-    case TreeType::NZERO:
+    case TreeType::NONZERO:
         if_op->addChild(new Tree(TreeType::ZERO));
         break;
     case TreeType::SIGN:
@@ -72,6 +124,10 @@ static void processSimpleCond(Tree *func, Tree *cond, Tree *label_then, Tree *la
     case TreeType::NSIGN:
         if_op->addChild(new Tree(TreeType::SIGN));
         break;
+    case TreeType::ALWAYS:
+        delete if_op;
+        /* do nothing for comparison */
+        return;
     default:
         assert(0);
     }
@@ -90,10 +146,16 @@ static void processComparison(Tree *func, Tree *cond, Tree *label_then, Tree *la
     switch (cond->getType())
     {
     case TreeType::EQUAL:
-        if_op->addChild(new Tree(TreeType::NZERO));
+        if_op->addChild(new Tree(TreeType::NONZERO));
         break;
     case TreeType::NEQUAL:
         if_op->addChild(new Tree(TreeType::ZERO));
+        break;
+    case TreeType::GREATER:
+        if_op->addChild(new Tree(TreeType::NSIGN));
+        break;
+    case TreeType::LESS:
+        if_op->addChild(new Tree(TreeType::SIGN));
         break;
     default:
         assert(0);
@@ -112,6 +174,8 @@ static void processCond(Tree *func, Tree *cond, Tree *label_then, Tree *label_el
         break;
     case TreeType::EQUAL:
     case TreeType::NEQUAL:
+    case TreeType::GREATER:
+    case TreeType::LESS:
         processComparison(func, cond, label_then, label_else);
         break;
     default:
@@ -167,9 +231,14 @@ static void processReturn(Tree *func, Tree *op)
     func->addChild(res);
 }
 
-static Tree *processLShift(Tree *func, Tree *op)
+static void processHalt(Tree *func, Tree *op)
 {
-    Tree *res = new Tree(TreeType::LSHIFT);
+    func->addChild(op->clone());
+}
+
+static Tree *processShift(Tree *func, Tree *op, TreeType t)
+{
+    Tree *res = new Tree(t);
     Tree *temp = createTempVar(op->down(), nullptr);
     res->addChild(temp);
     res->addChild(op->down()->clone());
@@ -180,12 +249,13 @@ static Tree *processLShift(Tree *func, Tree *op)
     return temp;
 }
 
-static Tree *processRShift(Tree *func, Tree *op)
+static Tree *processModify(Tree *func, Tree *op, TreeType t)
 {
-    Tree *res = new Tree(TreeType::RSHIFT);
+    Tree *res = new Tree(t);
     Tree *temp = createTempVar(op->down(), nullptr);
     res->addChild(temp);
     res->addChild(op->down()->clone());
+    res->addChild(processExpr(func, op->down()->right()));
     func->addChild(res);
     Tree *assign = new Tree(TreeType::ASSIGN,
         op->down()->clone(), temp->clone());
@@ -220,6 +290,12 @@ static void processStatement(Tree *func, Tree *st)
     case TreeType::ASSIGN:
         processAssign(func, st);
         break;
+    case TreeType::ADD_ASSIGN:
+        processModify(func, st, TreeType::ADD);
+        break;
+    case TreeType::SUB_ASSIGN:
+        processModify(func, st, TreeType::SUB);
+        break;
     case TreeType::IF:
         processIf(func, st);
         break;
@@ -230,10 +306,16 @@ static void processStatement(Tree *func, Tree *st)
         processReturn(func, st);
         break;
     case TreeType::LSHIFT:
-        processLShift(func, st);
+        processShift(func, st, TreeType::LSHIFT);
         break;
     case TreeType::RSHIFT:
-        processRShift(func, st);
+        processShift(func, st, TreeType::RSHIFT);
+        break;
+    case TreeType::OUT:
+        processOut(func, st);
+        break;
+    case TreeType::HALT:
+        processHalt(func, st);
         break;
     default:
         break;
@@ -271,21 +353,80 @@ Tree *makeOperations(Tree *root)
     return newRoot;
 }
 
-static void createVariablesFunc(CodeGraph *graph, Tree *func)
+/////////////////////////////////////////////////////////////////
+
+// static void checkBinaryRanges(Tree *stat)
+// {
+//     Tree *last = stat->down()->right()->right();
+//     if (last->getType() == TreeType::LIST)
+//     {
+//         last = last->down();
+//     }
+//     assert(!last->right());
+//     if (last->getType() == TreeType::INT)
+//     {
+//         int val = last->get<int>();
+//         if (val < 0 || val > 7)
+//         {
+//             Tree *temp = createTemp();
+//             last->replaceWith(temp);
+//             Tree *assign = new Tree(TreeType::ASSIGN,
+//                 new Tree(TreeType::LIST, temp->clone()),
+//                 new Tree(TreeType::LIST, last));
+//             stat->insertLeft(assign);
+//         }
+//     }
+// }
+
+// static void checkRangesFunction(Tree *root)
+// {
+//     // Tree *it = root->down();
+//     // while (it)
+//     // {
+//     //     switch (it->getType())
+//     //     {
+//     //     case TreeType::ADD:
+//     //     case TreeType::SUB:
+//     //         checkBinaryRanges(it);
+//     //         break;
+//     //     }
+//     //     it = it->right();
+//     // }
+// }
+
+// void checkRanges(Tree *root)
+// {
+//     Tree *it = root->down();
+//     while (it)
+//     {
+//         checkRangesFunction(it);
+//         it = it->right();
+//     }
+// }
+
+/////////////////////////////////////////////////////////////////
+
+static void createVariablesFunc( Tree *func)
 {
     typedef std::map<int, Trees> AllVars;
     // Variables coming to labels
-    std::map<CodeGraph::Node*, AllVars> nodeVars;
+    // std::map<CodeGraph::Node*, AllVars> nodeVars;
     typedef std::map<int, Tree*> Vars;
     // collect variables
-    CodeGraph::Node *n = graph->getNodes().front();
-    graph->clearVisited();
-    graph->dfs(n, Vars(), [&nodeVars](CodeGraph::Node *node, Vars &vars)
+    // CodeGraph::Node *n = graph->getNodes().front();
+    // graph->clearVisited();
+    Vars vars;
+#if 0
+    for (Tree *st = func->down() ; st ; st = st->right())
+    {
+/*
+    graph->dfs(n, 1, [&nodeVars](CodeGraph::Node *node, int unused)
         {
             Tree *tree = node->info;
-            TreeType tt = tree->getType();
-            Tree *left = tree->down();
-            if (tt == TreeType::LABEL)
+            */
+            TreeType tt = st->getType();
+            Tree *left = st->down();
+/*            if (tt == TreeType::LABEL)
             {
                 // save the vars
                 for (auto &vv : vars)
@@ -304,7 +445,7 @@ static void createVariablesFunc(CodeGraph *graph, Tree *func)
                     vv.second = dest.front();
                 }
             }
-            else if (tt != TreeType::CMP && tt != TreeType::RETURN
+            else */if (st->isModification()
                 && left && left->getType() == TreeType::LIST)
             {
                 // modifies first argument
@@ -312,16 +453,19 @@ static void createVariablesFunc(CodeGraph *graph, Tree *func)
                 {
                     if (sym->getType() == TreeType::SYMBOL)
                     {
-                        int var = sym->get<int>();
-                        Tree *temp = createTemp();
-                        vars[var] = temp;
-                        sym->insertParent(temp);
-                        sym = temp;
+                        //int var = sym->get<int>();
+                        //Tree *temp = createTemp();
+                        //vars[var] = temp;
+                        //sym->insertParent(temp);
+                        //sym = temp;
+                        sym->setType(TreeType::VAR);
                     }
                 }
             }
         }
-    );
+#endif
+    //);
+    /*
     // insert phi
     for (auto nv : nodeVars)
     {
@@ -336,24 +480,24 @@ static void createVariablesFunc(CodeGraph *graph, Tree *func)
             nv.first->info->insertRight(phiNode);
         }
     }
+    */
     // replace usages
     // TODO: loop to vars
-    Vars phi;
+    //Vars phi;
     for (Tree *st = func->down() ; st ; st = st->right())
     {
         Tree *op = st->down();
-        if (op && st->getType() != TreeType::CMP
-            && st->getType() != TreeType::RETURN
-            && st->getType() != TreeType::LABEL)
-        {
-            // Tree *v = op;
-            // if (v->getType() == TreeType::LIST)
-            // {
-            //     v = v->down();
-            // }
-            // v->setFlag(FLAG_DEF);
-            op = op->right();
-        }
+        // if (op && st->isModification())
+        // {
+        //     // Tree *v = op;
+        //     // if (v->getType() == TreeType::LIST)
+        //     // {
+        //     //     v = v->down();
+        //     // }
+        //     // v->setFlag(FLAG_DEF);
+        //     op = op->right();
+        // }
+        // only usages, not assignments
         for ( ; op ; op = op->right())
         {
             Tree *v = op;
@@ -365,19 +509,33 @@ static void createVariablesFunc(CodeGraph *graph, Tree *func)
             {
                 if (v->getType() == TreeType::SYMBOL)
                 {
-                    Tree *n = phi[v->get<int>()];
-                    if (!n)
-                    {
-                        n = createTemp();
-                    }
-                    else
-                    {
-                        n = n->clone();
-                    }
-                    // n->setFlag(FLAG_USE);
-                    v->replaceWith(n);
-                    std::swap(v, n);
-                    delete n;
+                    v->setType(TreeType::VAR);
+                    // Tree *n;
+                    // int var = v->get<int>();
+                    // /*
+                    // n = phi[var];
+                    // if (!n)
+                    // {
+                    //     n = createTemp();
+                    // }
+                    // else
+                    // {
+                    //     n = n->clone();
+                    // }
+                    // */
+                    // n = vars[var];
+                    // if (n)
+                    // {
+                    //     n = n->clone();
+                    // }
+                    // else
+                    // {
+                    //     n = createTemp();
+                    // }
+                    // // n->setFlag(FLAG_USE);
+                    // v->replaceWith(n);
+                    // std::swap(v, n);
+                    // delete n;
                 }
                 // else if (v->getType() == TreeType::VAR)
                 // {
@@ -385,21 +543,33 @@ static void createVariablesFunc(CodeGraph *graph, Tree *func)
                 // }
             }
         }
+        /*
         if (st->getType() == TreeType::PHI)
         {
             Tree *var = st->down();
             Tree *sym = var->down();
             phi[sym->get<int>()] = var;
         }
+        */
     }
 }
 
-void createVariables(CodeGraphList *graphs, Tree *root)
+void createVariables(Tree *root)
 {
     root = root->down();
-    for (auto g : *graphs)
+    while (root)
     {
-        createVariablesFunc(g, root);
+        createVariablesFunc(root);
+        root = root->right();
+    }
+}
+
+void insertReturns(Tree *root)
+{
+    root = root->down();
+    while (root)
+    {
+        root->addChild(new Tree(TreeType::RETURN));
         root = root->right();
     }
 }

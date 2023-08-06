@@ -4,7 +4,9 @@
 #include "tree.h"
 #include "graph.h"
 
-void createVariables(CodeGraphList *graphs, Tree *root);
+void insertReturns(Tree *root);
+void createVariables(Tree *root);
 Tree *makeOperations(Tree *root);
+//void checkRanges(Tree *root);
 
 #endif

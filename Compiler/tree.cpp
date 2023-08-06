@@ -82,6 +82,22 @@ void Tree::insertParent(Tree *n)
     n->addChild(this);
 }
 
+void Tree::insertLeft(Tree *n)
+{
+    if (prev)
+    {
+        prev->next = n;
+    }
+    else if (parent)
+    {
+        parent->child = n;
+    }
+    n->prev = prev;
+    n->next = this;
+    n->parent = parent;
+    prev = n;
+}
+
 void Tree::insertRight(Tree *n)
 {
     if (next)
@@ -114,6 +130,27 @@ void Tree::replaceWith(Tree *n)
     }
     next = nullptr;
     prev = nullptr;
+}
+
+void Tree::deleteSubtree()
+{
+    while (child)
+    {
+        child->deleteSubtree();
+    }
+    if (parent && parent->child == this)
+    {
+        parent->child = next;
+    }
+    if (prev)
+    {
+        prev->next = next;
+    }
+    if (next)
+    {
+        next->prev = prev;
+    }
+    delete this;
 }
 
 void Tree::print(int level) const
@@ -158,11 +195,17 @@ std::string Tree::getTreeName() const
         return "Cmp";
     case TreeType::PHI:
         return "Phi";
+    case TreeType::OUT:
+        return "Out";
 
     case TreeType::LSHIFT:
         return "LShift";
     case TreeType::RSHIFT:
         return "RShift";
+    case TreeType::ADD_ASSIGN:
+        return "AddAssign";
+    case TreeType::SUB_ASSIGN:
+        return "SubAssign";
 
     case TreeType::ALWAYS:
         return "ALWAYS";
@@ -172,8 +215,8 @@ std::string Tree::getTreeName() const
         return "NCARRY";
     case TreeType::ZERO:
         return "ZERO";
-    case TreeType::NZERO:
-        return "NZERO";
+    case TreeType::NONZERO:
+        return "NONZERO";
     case TreeType::SIGN:
         return "SIGN";
     case TreeType::NSIGN:
@@ -182,6 +225,10 @@ std::string Tree::getTreeName() const
         return "EQUAL";
     case TreeType::NEQUAL:
         return "NEQUAL";
+    case TreeType::GREATER:
+        return "GREATER";
+    case TreeType::LESS:
+        return "LESS";
 
     case TreeType::REG:
         return "R" + std::to_string(get<int>());
@@ -199,6 +246,48 @@ std::string Tree::getTreeName() const
         return "SUB";
     case TreeType::SHR:
         return "SHR";
+    case TreeType::LOAD:
+        return "LOAD";
+    case TreeType::STORE:
+        return "STORE";
+    case TreeType::HALT:
+        return "HALT";
     }
     return std::to_string((int)type);
+}
+
+bool Tree::isModification() const
+{
+    switch (type)
+    {
+    case TreeType::NONE:
+    case TreeType::INT:
+    case TreeType::VAR:
+    case TreeType::SYMBOL:
+    case TreeType::FUNC:
+    case TreeType::ARGS:
+    case TreeType::LABEL:
+    case TreeType::LIST:
+    case TreeType::SCOPE:
+    case TreeType::RETURN:
+    case TreeType::IF:
+    case TreeType::WHILE:
+    case TreeType::GOTO:
+    case TreeType::CMP:
+    case TreeType::OUT:
+    case TreeType::ALWAYS:
+    case TreeType::CARRY:
+    case TreeType::NCARRY:
+    case TreeType::ZERO:
+    case TreeType::NONZERO:
+    case TreeType::SIGN:
+    case TreeType::NSIGN:
+    case TreeType::EQUAL:
+    case TreeType::NEQUAL:
+    case TreeType::REG:
+    case TreeType::JMP:
+    case TreeType::STORE:
+        return false;
+    }
+    return true;
 }

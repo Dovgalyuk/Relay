@@ -27,6 +27,10 @@ static void colorGraph(VariableGraph *graph)
         if (!n->visited)
         {
             graph->dfs(n, 0, [](VariableNode *node, int unused) {
+                if (node->visited)
+                {
+                    return;
+                }
                 Vars colors;
                 for (VariableNode *link : node->links)
                 {
@@ -35,16 +39,29 @@ static void colorGraph(VariableGraph *graph)
                         colors.insert(link->color);
                     }
                 }
+                int i = 1;
+                for (int c : colors)
+                {
+                    if (c == i)
+                    {
+                        i = c + 1;
+                    }
+                    else if (c > i)
+                    {
+                        break;
+                    }
+                }
+                node->color = i;
             });
         }
     }
 }
 
-VariableGraph *buildVariableGraph(const NodeVars &live)
+static VariableGraph *buildVariableGraph(const NodeVars &in, const NodeVars &out)
 {
     VariableNodes nodes;
     VariableGraph *graph = new VariableGraph;
-    for (auto nv : live)
+    for (auto nv : in)
     {
         const Vars &v = nv.second;
         for (int var : v)
@@ -65,20 +82,55 @@ VariableGraph *buildVariableGraph(const NodeVars &live)
     return graph;
 }
 
+static void setRegisters(Tree *func, VariableGraph *graph)
+{
+    std::map<int, int> varToReg;
+    for (auto v : graph->getNodes())
+    {
+        varToReg[v->info] = v->color;
+    }
+    for (Tree *stat = func->down() ; stat ; stat = stat->right())
+    {
+        Tree *prev = nullptr;
+        Tree *right = stat->down();
+        for ( ; right ; right = right->right())
+        {
+            if (right->getType() == TreeType::LIST)
+            {
+                assert(!prev);
+                prev = right;
+                right = right->down();
+            }
+            if (right->getType() == TreeType::VAR)
+            {
+                right->setType(TreeType::REG);
+                right->set<int>(varToReg[right->get<int>()]);
+            }
+            if (prev && !right->right())
+            {
+                right = prev;
+                prev = nullptr;
+            }
+        }
+    }
+}
+
 void simpleAllocationFunction(Tree *func)
 {
-    NodeVars liveVars;
+    // NodeVars liveVars;
     NodeVars defVars;
-    NodeVars defPhiVars;
-    NodeVars usePhiVars;
+    NodeVars useVars;
+    NodeVars outVars;
+    NodeVars inVars;
+    // NodeVars defPhiVars;
+    // NodeVars usePhiVars;
     // fill initial liveVars and defVars
     for (Tree *stat = func->down() ; stat ; stat = stat->right())
     {
         Tree *right = stat->down();
-        bool isPhi = stat->getType() == TreeType::PHI;
+        // bool isPhi = stat->getType() == TreeType::PHI;
         // definitions
-        if (stat->getType() != TreeType::CMP
-            && stat->getType() != TreeType::RETURN
+        if (stat->isModification()
             && stat->down())
         {
             Tree *left = stat->down();
@@ -92,11 +144,11 @@ void simpleAllocationFunction(Tree *func)
             {
                 if (left->getType() == TreeType::VAR)
                 {
-                    if (isPhi)
-                    {
-                        defPhiVars[stat].insert(left->get<int>());
-                    }
-                    else
+                    // if (isPhi)
+                    // {
+                    //     defPhiVars[stat].insert(left->get<int>());
+                    // }
+                    // else
                     {
                         defVars[stat].insert(left->get<int>());
                     }
@@ -117,13 +169,14 @@ void simpleAllocationFunction(Tree *func)
             }
             if (right->getType() == TreeType::VAR)
             {
-                if (isPhi)
+                // if (isPhi)
+                // {
+                //     usePhiVars[stat].insert(right->get<int>());
+                // }
+                // else
                 {
-                    usePhiVars[stat].insert(right->get<int>());
-                }
-                else
-                {
-                    liveVars[stat].insert(right->get<int>());
+                    useVars[stat].insert(right->get<int>());
+                    inVars[stat].insert(right->get<int>());
                 }
             }
             if (prev && !right->right())
@@ -133,101 +186,83 @@ void simpleAllocationFunction(Tree *func)
             }
         }
     }
+    // bool changed;
+    // // move down from definitions
+    // NodeVars reachVars = defVars;
+    // reachVars.insert(defPhiVars.begin(), defPhiVars.end());
+    // CodeGraph *graph = createCodeGraph(func);
+    // do
+    // {
+    //     changed = false;
+    //     // propagate reachVars
+    //     graph->clearVisited();
+    //     CodeGraph::Node *node = graph->getNodes().front();
+    //     graph->dfs(node, (CodeGraph::Node*)nullptr,
+    //         [&reachVars, &changed]
+    //             (CodeGraph::Node *node, CodeGraph::Node *&prev)
+    //         {
+    //             Tree *t = node->info;
+    //             Tree *pt = prev ? prev->info : nullptr;
+    //             const Vars &reachPrev = reachVars[pt];
+    //             Vars &reach = reachVars[t];
+    //             for (auto var : reachPrev)
+    //             {
+    //                 if (!reach.contains(var))
+    //                 {
+    //                     reach.insert(var);
+    //                     changed = true;
+    //                 }
+    //             }
+    //             prev = node;
+    //         }
+    //     );
+    // }
+    // while (changed);
+    // delete graph;
+
     bool changed;
-    // move down from definitions
-    NodeVars reachVars = defVars;
-    reachVars.insert(defPhiVars.begin(), defPhiVars.end());
+    // move up from usage
     CodeGraph *graph = createCodeGraph(func);
     do
     {
         changed = false;
-        // propagate reachVars
+        // propagate in & out
         graph->clearVisited();
         CodeGraph::Node *node = graph->getNodes().front();
-        graph->dfs(node, (CodeGraph::Node*)nullptr,
-            [&reachVars, &changed]
-                (CodeGraph::Node *node, CodeGraph::Node *&prev)
+        graph->dfs(node, 0,
+            [&defVars, &useVars, &inVars, &outVars, &changed]
+                (CodeGraph::Node *node, int unused)
             {
                 Tree *t = node->info;
-                Tree *pt = prev ? prev->info : nullptr;
-                const Vars &reachPrev = reachVars[pt];
-                Vars &reach = reachVars[t];
-                for (auto var : reachPrev)
+                Vars &out = outVars[t];
+                for (CodeGraph::Node *link : node->links)
                 {
-                    if (!reach.contains(var))
+                    Tree *next = link->info;
+                    for (auto var : inVars[next])
                     {
-                        reach.insert(var);
-                        changed = true;
-                    }
-                }
-                prev = node;
-            }
-        );
-    }
-    while (changed);
-    delete graph;
-
-    // move up from usage
-    graph = createReverseCodeGraph(func);
-    do
-    {
-        changed = false;
-        // propagate liveVars
-        graph->clearVisited();
-        CodeGraph::Node *node = graph->getNodes().back();
-        graph->dfs(node, (CodeGraph::Node*)nullptr,
-            [&defVars, &defPhiVars, &usePhiVars, &liveVars, &reachVars, &changed]
-                (CodeGraph::Node *node, CodeGraph::Node *&prev)
-            {
-                Tree *t = node->info;
-                Tree *pt = prev ? prev->info : nullptr;
-                Vars add = liveVars[pt];
-                Vars remove = defVars[pt];
-                const Vars &defsPhi = defPhiVars[pt];
-                const Vars &reach = reachVars[t];
-                remove.insert(defsPhi.begin(), defsPhi.end());
-
-                Vars &curLive = liveVars[t];
-                // if needs phi defs, add phi usages
-                for (auto def : defPhiVars[t])
-                {
-                    if (curLive.contains(def))
-                    {
-                        const Vars &usePhi = usePhiVars[t];
-                        add.insert(usePhi.begin(), usePhi.end());
-                        break;
+                        if (!out.contains(var))
+                        {
+                            out.insert(var);
+                            changed = true;
+                        }
                     }
                 }
 
-                for (auto var : remove)
-                    add.erase(var);
-                for (Vars::iterator it = add.begin() ; it != add.end() ; )
+                Vars add = out;
+                for (auto def : defVars[t])
                 {
-                    if (!reach.contains(*it))
-                        it = add.erase(it);
-                    else
-                        ++it;
+                    add.erase(def);
                 }
 
-                // add prev live to curr live
+                Vars &in = inVars[t];
                 for (auto var : add)
                 {
-                    if (!curLive.contains(var))
+                    if (!in.contains(var))
                     {
-                        curLive.insert(var);
+                        in.insert(var);
                         changed = true;
                     }
                 }
-                // remove prev defs from live
-                for (auto var : remove)
-                {
-                    if (curLive.contains(var))
-                    {
-                        curLive.erase(var);
-                        changed = true;
-                    }
-                }
-                prev = node;
             }
         );
     }
@@ -238,19 +273,22 @@ void simpleAllocationFunction(Tree *func)
     std::cout << "=== After liveness analysis:\n";
     for (Tree *stat = func->down() ; stat ; stat = stat->right())
     {
-        const Vars &vars = liveVars[stat];
-        std::cout << "Live:";
-        for (auto var : vars)
+        std::cout << "In:";
+        for (auto var : inVars[stat])
+            std::cout << " " << var;
+        std::cout << "\nOut:";
+        for (auto var : outVars[stat])
             std::cout << " " << var;
         std::cout << "\n";
         stat->print(2);
     }
 
     // build variable graph
-    VariableGraph *varGraph = buildVariableGraph(liveVars);
+    VariableGraph *varGraph = buildVariableGraph(inVars, outVars);
 
     // allocate registers
     colorGraph(varGraph);
+    setRegisters(func, varGraph);
 
     std::cout << "=== Variable graph:\n";
     varGraph->print();

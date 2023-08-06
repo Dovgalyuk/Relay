@@ -18,26 +18,37 @@ int main(int argc, char *argv[])
         // optimize tree
         // convert to 3-address code
         root = makeOperations(root);
+        //checkRanges(root);
         std::cout << "=== 3-address tree:\n";
         root->print();
-        // create scopes and variables and convert to SSA
-        CodeGraphList *codeGraph = createCodeGraphs(root);
-        std::cout << "=== control flow graphs:\n";
-        for (auto g : *codeGraph)
+        // add return at the end
+        insertReturns(root);
         {
-            std::cout << "\nGraph " << g << "\n";
-            g->print();
+            CodeGraphList *codeGraph = createCodeGraphs(root);
+            std::cout << "=== control flow graphs:\n";
+            for (auto g : *codeGraph)
+            {
+                std::cout << "\nGraph " << g << "\n";
+                g->print();
+            }
+            // remote dead code
+            removeDeadCode(codeGraph, root);
+            delete codeGraph;
         }
-        createVariables(codeGraph, root);
+        std::cout << "=== After dead code elimination:\n";
+        root->print();
+        // create variables instead of symbols
+        createVariables(root);
         std::cout << "=== Created variables:\n";
         root->print();
         // optimize assignments
-        // makeCopyPropagation(root);
-        // std::cout << "=== After copy propagation:\n";
-        // root->print();
-        // remove dead code
+        //makeCopyPropagation(root);
+        //removeUselessCopying(root);
+        //std::cout << "=== After copy propagation:\n";
+        //root->print();
         // allocate variables
         simpleAllocation(root);
+        removeUselessCopying(root);
         std::cout << "=== After allocation:\n";
         root->print();
         // transform code to instruction level

@@ -24,19 +24,24 @@ enum class TreeType
     GOTO,
     CMP,
     PHI,
+    OUT,
     LSHIFT,
     RSHIFT,
+    ADD_ASSIGN,
+    SUB_ASSIGN,
     ALWAYS,
     CARRY,
     NCARRY,
     ZERO,
-    NZERO,
+    NONZERO,
     SIGN,
     NSIGN,
     EQUAL,
     NEQUAL,
+    GREATER,
+    LESS,
     // same as binary instructions
-    // ADD, SUB, OR, XOR, AND
+    // ADD, SUB, OR, XOR, AND, HALT
 
     ////////////////
     // backend nodes
@@ -55,6 +60,12 @@ enum class TreeType
     XOR,
     // unary ops
     SHR,
+    // memory ops
+    STORE,
+    LOAD,
+    // other
+    HALT,
+    NOP,
 };
 
 enum
@@ -123,8 +134,10 @@ public:
     void addChild(Tree *n);
     void merge(Tree *n);
     void insertParent(Tree *n);
+    void insertLeft(Tree *n);
     void insertRight(Tree *n);
     void replaceWith(Tree *n);
+    void deleteSubtree();
 
     Tree *up() { return parent; }
     Tree *down() { return child; }
@@ -140,6 +153,8 @@ public:
 
     bool checkFlag(uint32_t flag) { return flags & flag; }
     void setFlag(uint32_t flag) { flags |= flag; }
+
+    bool isModification() const;
 
 private:
     void printTree(int level) const;

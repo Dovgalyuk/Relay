@@ -1,5 +1,10 @@
 # Compiler for a fistful of relays computer
 
+TODO:
+
+* long number comparison
+* address calculation for OUT
+
 ## Language features
 
 No recursion
@@ -57,6 +62,11 @@ SHR: >> b;
 SHR + RCR: >> cd;
 
 ROR: unsupported
+
+### Peripherals
+
+val = IN(port)
+OUT(port, val)
 
 ### Assignments
 

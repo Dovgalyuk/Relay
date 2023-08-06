@@ -2,7 +2,7 @@
 #include <cassert>
 #include "graph.h"
 
-static CodeGraph *createFunctionGraph(Tree *func, bool reverse = false)
+CodeGraph *createFunctionCodeGraph(Tree *func, bool reverse)
 {
     std::map<int, CodeGraph::Node*> labels;
     std::map<Tree*, CodeGraph::Node*> nodes;
@@ -72,7 +72,7 @@ CodeGraphList *createCodeGraphs(Tree *root)
     Tree *it = root->down();
     while (it)
     {
-        graph->push_back(createFunctionGraph(it));
+        graph->push_back(createFunctionCodeGraph(it));
         it = it->right();
     }
     return graph;
@@ -99,10 +99,10 @@ void Graph<int>::Node::printLink()
 
 CodeGraph *createCodeGraph(Tree *root)
 {
-    return createFunctionGraph(root, false);
+    return createFunctionCodeGraph(root, false);
 }
 
 CodeGraph *createReverseCodeGraph(Tree *root)
 {
-    return createFunctionGraph(root, true);
+    return createFunctionCodeGraph(root, true);
 }

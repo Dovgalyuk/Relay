@@ -45,7 +45,7 @@ static void processAdd(Tree *func, Tree *op)
         Tree *n2 = right;
         if (n2)
         {
-            if (n1 || n1->getType() == TreeType::INT)
+            if (!n1 || n1->getType() == TreeType::INT)
             {
                 std::swap(n1, n2);
             }
@@ -68,6 +68,55 @@ static void processAdd(Tree *func, Tree *op)
 
         res = res->right();
         left = left->right();
+    }
+}
+
+static void processSub(Tree *func, Tree *op)
+{
+    Tree *res = op->down();
+    Tree *left = res->right();
+    Tree *right = left->right();
+    res = res->down();
+    left = left->down();
+    right = right->down();
+    bool first = true;
+    while (res)
+    {
+        Tree *n1 = left;
+        Tree *n2 = right;
+        Tree *sub = new Tree(first ? TreeType::SUB : TreeType::SBC);
+        sub->addChild(new Tree(res));
+        sub->addChild(new Tree(n1));
+        if (n2)
+        {
+            sub->addChild(new Tree(n2));
+            right = right->right();
+        }
+        else
+        {
+            sub->addChild(new Tree(0));
+        }
+        func->addChild(sub);
+        first = false;
+
+        res = res->right();
+        left = left->right();
+    }
+}
+
+static void processOut(Tree *func, Tree *op)
+{
+    Tree *addr = op->down();
+    Tree *right = addr->right();
+    addr = addr->down();
+    right = right->down();
+    while (right)
+    {
+        Tree *out = new Tree(TreeType::STORE);
+        out->addChild(right->clone());
+        out->addChild(addr->clone());
+        func->addChild(out);
+        right = right->right();
     }
 }
 
@@ -185,8 +234,17 @@ static Tree *processFunction(Tree *func)
                     // This is L register
                     new Tree(-1, TreeType::VAR)));
             break;
+        case TreeType::HALT:
+            newFunc->addChild(it->clone());
+            break;
         case TreeType::ADD:
             processAdd(newFunc, it);
+            break;
+        case TreeType::SUB:
+            processSub(newFunc, it);
+            break;
+        case TreeType::OUT:
+            processOut(newFunc, it);
             break;
         case TreeType::LSHIFT:
             processLShift(newFunc, it);

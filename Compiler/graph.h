@@ -43,6 +43,20 @@ public:
             links.push_back(n);
         }
 
+        Node *getNext() const
+        {
+            if (links.empty())
+            {
+                return nullptr;
+            }
+            Node *res = links.front();
+            if (res != links.back())
+            {
+                return nullptr;
+            }
+            return res;
+        }
+
         bool visited;
         int color;
         T info;
@@ -69,7 +83,8 @@ public:
     {
         for (auto n : nodes)
         {
-            std::cout << "Node " << n << " ->";
+            std::cout << "Node " << n << " "
+                << n->visited << " ->";
             for (auto next : n->links)
             {
                 next->printLink();
@@ -103,5 +118,6 @@ typedef std::list<CodeGraph*> CodeGraphList;
 CodeGraphList *createCodeGraphs(Tree *root);
 CodeGraph *createCodeGraph(Tree *root);
 CodeGraph *createReverseCodeGraph(Tree *func);
+CodeGraph *createFunctionCodeGraph(Tree *func, bool reverse = false);
 
 #endif
